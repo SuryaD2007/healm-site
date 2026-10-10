@@ -26,10 +26,11 @@
 <li>Your health file: birth date, sex, height and weight, goals, habits, conditions, surgeries, family history, medications and supplements, and allergies.</li>
 <li>Lab results you add, with a small thumbnail of each report.</li>
 <li>Your daily readings from Apple Health, your daily number, and its note.</li>
+<li>Today's plan and what you ticked or logged, the patterns Healm noticed, and your step goal.</li>
 <li>Your conversations with Healm, and small thumbnails of photos you sent with them.</li>
 <li>Your scans and label reads, with small thumbnails. Full photos are never saved.</li>
 </ul>
-<p>None of this is synced to iCloud or copied to Healm's server. The home screen and lock screen widgets see only your number, the note, the day count, and the names of any flagged metrics.</p>
+<p>None of this is synced to iCloud or copied to Healm's server. The home screen and lock screen widgets see only your number, the note, the day count, the names of any flagged metrics, and today's steps and step goal. If you pin your step goal to the lock screen, it shows today's steps, the goal, and your number.</p>
 
 <h2>On Healm's server</h2>
 <p>Healm's server holds only what it needs to run the service. None of it is health information.</p>
@@ -38,7 +39,7 @@
 <tbody>
 <tr><td>An account id with no name</td><td>Made when you first open Healm, so your daily limits can be counted. Kept until you delete everything.</td></tr>
 <tr><td>When the account was made and last used, and that it is on iPhone</td><td>To tell active accounts from abandoned ones. Kept until you delete everything.</td></tr>
-<tr><td>Daily counts of questions, scans, label reads, lab readings, and notes</td><td>For the daily limits. A number per day, never what you asked. Kept until you delete everything.</td></tr>
+<tr><td>Daily counts of questions, scans, label reads, lab readings, notes, and checks of conditions outside</td><td>For the daily limits. A number per day, never what you asked. Kept until you delete everything.</td></tr>
 <tr><td>Your email and, if you add it, your phone number</td><td>Only if you join the clinician waitlist, so Healm can tell you when clinicians arrive. Removed when you leave the list or delete everything.</td></tr>
 <tr><td>Your Apple ID's email and Apple's id for you</td><td>Only if you choose Sign in with Apple, so a new phone can sign in to the same account. The email is often a private relay address from Apple. Removed when you delete everything.</td></tr>
 </tbody>
@@ -60,11 +61,18 @@
 <h2>Apple Health</h2>
 <ul>
 <li>Healm only reads from Apple Health. It never writes to it.</li>
-<li>It reads sleep, heart rate, resting heart rate, heart rate variability, steps, active energy, blood oxygen, breathing rate, VO2 max, weight, body fat, and height, once a day and when new data arrives.</li>
+<li>It reads sleep, heart rate, resting heart rate, heart rate variability, steps, active energy, blood oxygen, breathing rate, VO2 max, weight, body fat, height, and workouts, once a day and when new data arrives, and today's steps, active energy, and latest heart rate while Today is open.</li>
 <li>The readings are stored on your phone. They are never stored on Healm's server and never synced to iCloud.</li>
 <li>They leave your phone only inside an answer you allowed, as described above.</li>
 <li>They are never used for advertising, never sold, and never shared with data brokers.</li>
 <li>You can change what Healm reads at any time: open Healm in the iOS Settings app, then Health.</li>
+</ul>
+
+<h2>Motion and location</h2>
+<ul>
+<li><strong>Motion and Fitness.</strong> While Today is open, Healm counts today's steps, distance, and flights from your iPhone's motion sensors. They are shown and then let go; they never leave your phone.</li>
+<li><strong>Location.</strong> Only if you tap Show conditions outside on Today, Healm asks for your approximate location, while you use the app, never always and never precise. It rounds the place to about a kilometer and sends it to Apple Weather for the UV index, and through Healm's server to Open-Meteo for air quality and Google for pollen. Healm does not store your location on its server or write it to a log, and keeps only the readings on your phone, for an hour. You can turn location off for Healm at any time in the iOS Settings app.</li>
+<li>Today's patterns, plan, streaks, and charts are worked out on your phone. Nothing about them leaves it unless you tap into Ask.</li>
 </ul>
 
 <h2>Photos and the camera</h2>
@@ -86,7 +94,9 @@
 <tbody>
 <tr><td>Supabase</td><td>Hosts Healm's server, database, and sign-in, in the United States. Its logs record the time and IP address of requests, for security, and are deleted on its schedule. Healm's own logs record one line per call: the function, a scrambled account id, the result, and how long it took. Never what was sent.</td></tr>
 <tr><td>Anthropic</td><td>Writes the answers, with your permission, as described above.</td></tr>
-<tr><td>Apple</td><td>Sign in with Apple, if you choose it. Apple Health stays on your phone.</td></tr>
+<tr><td>Apple</td><td>Sign in with Apple, if you choose it, and Apple Weather for the UV index, with your approximate place, if you look outside on Today. Apple Health stays on your phone.</td></tr>
+<tr><td>Open-Meteo</td><td>Air quality for your approximate place, if you look outside on Today. It receives the place from Healm's server, never anything about you.</td></tr>
+<tr><td>Google</td><td>Pollen for your approximate place, if you look outside on Today. It receives the place from Healm's server, never anything about you.</td></tr>
 </tbody>
 </table>
 
