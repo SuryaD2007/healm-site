@@ -12,7 +12,7 @@
 <a class="mark" href="./">Healm</a>
 
 <h1>Privacy policy</h1>
-<p class="meta">Last updated October 14, 2026</p>
+<p class="meta">Last updated October 15, 2026</p>
 
 <p class="lede">Your health file lives on your phone. Healm's server holds an account with no name, your daily counts, and your email only if you join the clinician waitlist. When you ask Healm something, what that one answer needs passes through to its AI model, with your permission, and Healm keeps none of it.</p>
 
@@ -52,8 +52,8 @@
 <p>Healm's answers in Ask, scan and label results, lab readings, and the morning note are written by Claude, an AI model made by Anthropic. Healm asks your permission before the first one, and you can turn it off in Settings, under AI answers. Without it, nothing is sent and the morning note comes from Healm's own wording.</p>
 <p>With your permission, each answer sends only what it needs, once:</p>
 <ul>
-<li>A question sends your question, recent messages in that conversation, a photo if you attached one, and a summary of your file, which can include conditions, medications, lab values, Apple Health readings like sleep and heart rate, and if you track food, what you have eaten today against your targets and your weight trend.</li>
-<li>Typing what you ate in Log food sends those words, so Claude can split them into foods and amounts. It does not see your targets, your log, or your weight, and it never sets the numbers: Healm's server looks each food up in USDA FoodData Central. The names and numbers of foods you saved go to Healm's server with it, so your own foods match first, and are not kept.</li>
+<li>A question sends your question, recent messages in that conversation, a photo if you attached one, and a summary of your file, which can include conditions, medications, lab values, Apple Health readings like sleep and heart rate, if you track food, what you have eaten today against your targets and your weight trend, and the conditions outside you looked up on Today: UV, air quality, pollen, and today's forecast, never your location.</li>
+<li>Typing what you ate in Log food sends those words, so Claude can split them into foods and amounts and name a brand or restaurant. It does not see your targets, your log, or your weight. Healm's server looks each food up in fatsecret (brands and restaurants) and USDA FoodData Central; only a food neither knows takes Claude's estimate, marked Estimate on its row, for you to keep or change. The names and numbers of foods you saved go to Healm's server with it, so your own foods match first, and are not kept.</li>
 <li>A scan or label read sends the photos and a summary of your file.</li>
 <li>A question about a skin, hair, or body scan also sends what Healm found in that scan, and with the first question only, the small thumbnails of its photos kept on your phone.</li>
 <li>A lab report sends the report image or PDF.</li>
@@ -74,7 +74,7 @@
 <h2>Motion and location</h2>
 <ul>
 <li><strong>Motion and Fitness.</strong> While Today is open, Healm counts today's steps, distance, and flights from your iPhone's motion sensors. They are shown and then let go; they never leave your phone.</li>
-<li><strong>Location.</strong> Only if you tap Show conditions outside on Today, Healm asks for your approximate location, while you use the app, never always and never precise. It rounds the place to about a kilometer and sends it to Apple Weather for the UV index, and through Healm's server to Open-Meteo for air quality and Google for pollen. Healm does not store your location on its server or write it to a log, and keeps only the readings on your phone, for an hour. You can turn location off for Healm at any time in the iOS Settings app.</li>
+<li><strong>Location.</strong> Only if you tap Show conditions outside on Today, Healm asks for your approximate location, while you use the app, never always and never precise. It rounds the place to about a kilometer and sends it to Apple Weather for the UV index and today's forecast, and through Healm's server to Open-Meteo for air quality and Google for pollen. Healm does not store your location on its server or write it to a log, and keeps only the last reading on your phone, without the place, so Ask can answer a weather question from it. You can turn location off for Healm at any time in the iOS Settings app.</li>
 <li>Today's patterns, plan, streaks, and charts are worked out on your phone. Nothing about them leaves it unless you tap into Ask.</li>
 </ul>
 
@@ -101,10 +101,11 @@
 <tbody>
 <tr><td>Supabase</td><td>Hosts Healm's server, database, and sign-in, in the United States. Its logs record the time and IP address of requests, for security, and are deleted on its schedule. Healm's own logs record one line per call: the function, a scrambled account id, the result, and how long it took. Never what was sent.</td></tr>
 <tr><td>Anthropic</td><td>Writes the answers, with your permission, as described above.</td></tr>
-<tr><td>Apple</td><td>Sign in with Apple, if you choose it, and Apple Weather for the UV index, with your approximate place, if you look outside on Today. Apple Health stays on your phone.</td></tr>
+<tr><td>Apple</td><td>Sign in with Apple, if you choose it, and Apple Weather for the UV index and today's forecast, with your approximate place, if you look outside on Today. Apple Health stays on your phone.</td></tr>
 <tr><td>Open-Meteo</td><td>Air quality for your approximate place, if you look outside on Today. It receives the place from Healm's server, never anything about you.</td></tr>
 <tr><td>Google</td><td>Pollen for your approximate place, if you look outside on Today. It receives the place from Healm's server, never anything about you.</td></tr>
 <tr><td>USDA FoodData Central</td><td>Nutrition facts for the foods you log. It receives food search words, such as "turkey ground 93% lean", and barcode digits from Healm's server, never anything about you.</td></tr>
+<tr><td>fatsecret</td><td>Nutrition facts for brand and restaurant foods you log. It receives the brand and food words, such as "McDonald's Hot 'n Spicy McChicken", from Healm's server, never anything about you.</td></tr>
 <tr><td>Open Food Facts</td><td>Nutrition facts for a barcode you scan. It receives the barcode digits from Healm's server, never anything about you.</td></tr>
 </tbody>
 </table>
