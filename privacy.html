@@ -12,7 +12,7 @@
 <a class="mark" href="./">Healm</a>
 
 <h1>Privacy policy</h1>
-<p class="meta">Last updated October 9, 2026</p>
+<p class="meta">Last updated October 14, 2026</p>
 
 <p class="lede">Your health file lives on your phone. Healm's server holds an account with no name, your daily counts, and your email only if you join the clinician waitlist. When you ask Healm something, what that one answer needs passes through to its AI model, with your permission, and Healm keeps none of it.</p>
 
@@ -29,6 +29,7 @@
 <li>Today's plan and what you ticked or logged, the patterns Healm noticed, and your step goal.</li>
 <li>Your conversations with Healm, and small thumbnails of photos you sent with them.</li>
 <li>Your scans and label reads, with small thumbnails. Full photos are never saved.</li>
+<li>If you track food: your food log, the foods you saved, your calorie and protein targets, the weights you type in, and the form you last picked for a food, such as raw or cooked.</li>
 </ul>
 <p>None of this is synced to iCloud or copied to Healm's server. The home screen and lock screen widgets see only your number, the note, the day count, the names of any flagged metrics, and today's steps and step goal. If you pin your step goal to the lock screen, it shows today's steps, the goal, and your number.</p>
 
@@ -39,9 +40,10 @@
 <tbody>
 <tr><td>An account id with no name</td><td>Made when you first open Healm, so your daily limits can be counted. Kept until you delete everything.</td></tr>
 <tr><td>When the account was made and last used, and that it is on iPhone</td><td>To tell active accounts from abandoned ones. Kept until you delete everything.</td></tr>
-<tr><td>Daily counts of questions, scans, label reads, lab readings, notes, and checks of conditions outside</td><td>For the daily limits. A number per day, never what you asked. Kept until you delete everything.</td></tr>
+<tr><td>Daily counts of questions, scans, label reads, lab readings, notes, checks of conditions outside, and food lookups</td><td>For the daily limits. A number per day, never what you asked. Kept until you delete everything.</td></tr>
 <tr><td>Your email and, if you add it, your phone number</td><td>Only if you join the clinician waitlist, so Healm can tell you when clinicians arrive. Removed when you leave the list or delete everything.</td></tr>
 <tr><td>Your Apple ID's email and Apple's id for you</td><td>Only if you choose Sign in with Apple, so a new phone can sign in to the same account. The email is often a private relay address from Apple. Removed when you delete everything.</td></tr>
+<tr><td>Public food facts from USDA FoodData Central and Open Food Facts</td><td>So the same food is not looked up twice. Kept for 30 days under a scrambled form of the search or barcode, with no account, name, or time of yours attached. Never what you typed, who looked it up, or your food log.</td></tr>
 </tbody>
 </table>
 <p>The Order tab asks what you would want to order first. Each choice you send adds one to a running total for that category. The total holds no account, name, time, or device, so it cannot be tied to you, and it stays after you delete everything. Anything you type beside Something else stays on your phone.</p>
@@ -50,7 +52,8 @@
 <p>Healm's answers in Ask, scan and label results, lab readings, and the morning note are written by Claude, an AI model made by Anthropic. Healm asks your permission before the first one, and you can turn it off in Settings, under AI answers. Without it, nothing is sent and the morning note comes from Healm's own wording.</p>
 <p>With your permission, each answer sends only what it needs, once:</p>
 <ul>
-<li>A question sends your question, recent messages in that conversation, a photo if you attached one, and a summary of your file, which can include conditions, medications, lab values, and Apple Health readings like sleep and heart rate.</li>
+<li>A question sends your question, recent messages in that conversation, a photo if you attached one, and a summary of your file, which can include conditions, medications, lab values, Apple Health readings like sleep and heart rate, and if you track food, what you have eaten today against your targets and your weight trend.</li>
+<li>Typing what you ate in Log food sends those words, so Claude can split them into foods and amounts. It does not see your targets, your log, or your weight, and it never sets the numbers: Healm's server looks each food up in USDA FoodData Central. The names and numbers of foods you saved go to Healm's server with it, so your own foods match first, and are not kept.</li>
 <li>A scan or label read sends the photos and a summary of your file.</li>
 <li>A question about a skin, hair, or body scan also sends what Healm found in that scan, and with the first question only, the small thumbnails of its photos kept on your phone.</li>
 <li>A lab report sends the report image or PDF.</li>
@@ -77,6 +80,10 @@
 
 <h2>Photos and the camera</h2>
 <p>Scan and label photos are held in memory only until their reply arrives, then released. Only a small thumbnail is saved, on your phone. Healm never saves photos to your photo library.</p>
+<p>A food barcode is read on your phone, and only its digits are sent, through Healm's server, to look the product up. A nutrition label is read on your phone with Apple's text recognition: the photo never leaves your phone and is not saved, and you check the numbers before the food is kept.</p>
+
+<h2>Food and weight</h2>
+<p>Food tracking is optional. Your food log, targets, and weights stay on your phone. Weights come from what you type and from Apple Health, including a scale that syncs to it. If you allow notifications, one line about the day's food can arrive in the evening, worked out and scheduled on your phone, only on a day you logged something; you can turn it off in Settings. If your file names an eating disorder, Healm turns calorie and weight tracking off.</p>
 
 <h2>Emergencies</h2>
 <p>Before any question is sent, Healm checks its words on your phone against a list of warning signs. If they suggest an emergency, Healm shows a Call 911 button at once. If they suggest thoughts of self-harm, Healm shows the 988 Suicide and Crisis Lifeline, to call or text. Healm never calls anyone for you, and no person watches conversations. A count of how often a warning sign matched is kept on your phone, without the words.</p>
@@ -97,6 +104,8 @@
 <tr><td>Apple</td><td>Sign in with Apple, if you choose it, and Apple Weather for the UV index, with your approximate place, if you look outside on Today. Apple Health stays on your phone.</td></tr>
 <tr><td>Open-Meteo</td><td>Air quality for your approximate place, if you look outside on Today. It receives the place from Healm's server, never anything about you.</td></tr>
 <tr><td>Google</td><td>Pollen for your approximate place, if you look outside on Today. It receives the place from Healm's server, never anything about you.</td></tr>
+<tr><td>USDA FoodData Central</td><td>Nutrition facts for the foods you log. It receives food search words, such as "turkey ground 93% lean", and barcode digits from Healm's server, never anything about you.</td></tr>
+<tr><td>Open Food Facts</td><td>Nutrition facts for a barcode you scan. It receives the barcode digits from Healm's server, never anything about you.</td></tr>
 </tbody>
 </table>
 
