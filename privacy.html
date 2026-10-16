@@ -12,7 +12,7 @@
 <a class="mark" href="./">Healm</a>
 
 <h1>Privacy policy</h1>
-<p class="meta">Last updated October 15, 2026</p>
+<p class="meta">Last updated October 16, 2026</p>
 
 <p class="lede">Your health file lives on your phone. Healm's server holds an account with no name, your daily counts, and your email only if you join the clinician waitlist. When you ask Healm something, what that one answer needs passes through to its AI model, with your permission, and Healm keeps none of it.</p>
 
@@ -23,7 +23,7 @@
 <h2>On your phone</h2>
 <p>Everything you put into Healm is stored on your iPhone, inside the app, protected by iOS file encryption and by Healm's Face ID lock:</p>
 <ul>
-<li>Your health file: birth date, sex, height and weight, goals, habits, conditions, surgeries, family history, medications and supplements, and allergies.</li>
+<li>Your health file: birth date (or the age you gave), sex, height and weight, goals, habits, conditions, surgeries, family history, medications and supplements, and allergies, including whether you said you take none or have none.</li>
 <li>Lab results you add, with a small thumbnail of each report.</li>
 <li>Your daily readings from Apple Health, your daily number, and its note.</li>
 <li>Today's plan and what you ticked or logged, the patterns Healm noticed, and your step goal.</li>
@@ -46,13 +46,13 @@
 <tr><td>Public food facts from USDA FoodData Central and Open Food Facts</td><td>So the same food is not looked up twice. Kept for 30 days under a scrambled form of the search or barcode, with no account, name, or time of yours attached. Never what you typed, who looked it up, or your food log.</td></tr>
 </tbody>
 </table>
-<p>The Order tab asks what you would want to order first. Each choice you send adds one to a running total for that category. The total holds no account, name, time, or device, so it cannot be tied to you, and it stays after you delete everything. Anything you type beside Something else stays on your phone.</p>
+<p>The Order tab shows examples of products Healm plans to offer, such as protein, creatine, electrolytes, skincare basics, sleep, and cold and flu products, each with an I want this button. What you choose is kept on your phone. When you tap Send, Healm adds one to a running total for each kind of product you want (protein, for example), once per kind from your phone. The total holds no account, name, product, time, or device, so it cannot be tied to you, and it stays after you delete everything. If you used an earlier version of Order, the totals for what you chose there work the same way, and anything you typed beside Something else stayed on your phone.</p>
 
 <h2>What passes through the AI model</h2>
 <p>Healm's answers in Ask, scan and label results, lab readings, and the morning note are written by Claude, an AI model made by Anthropic. Healm asks your permission before the first one, and you can turn it off in Settings, under AI answers. Without it, nothing is sent and the morning note comes from Healm's own wording.</p>
 <p>With your permission, each answer sends only what it needs, once:</p>
 <ul>
-<li>A question sends your question, recent messages in that conversation, a photo if you attached one, and a summary of your file, which can include conditions, medications, lab values, Apple Health readings like sleep and heart rate, today's step count and step goal, if you track food, what you have eaten today (each food and its numbers) against your targets, the training days your targets are set for, the names of foods you saved or logged recently, and your weight trend, and the conditions outside you looked up on Today: UV, air quality, pollen, and today's forecast, never your location.</li>
+<li>A question sends your question, recent messages in that conversation, a photo if you attached one, and a summary of your file, which can include conditions, medications (or that you have not said yet whether you take any, so the answer can mention what commonly interacts), lab values, Apple Health readings like sleep and heart rate, today's step count and step goal, if you track food, what you have eaten today (each food and its numbers) against your targets, the training days your targets are set for, the names of foods you saved or logged recently, and your weight trend, and the conditions outside you looked up on Today: UV, air quality, pollen, and today's forecast, never your location.</li>
 <li>Numbers you type to add as they are in Log food, such as "add 150 calories and 2g protein", are logged on your phone and sent nowhere. A question typed there, such as "what should I eat for dinner", is answered like any other question, above.</li>
 <li>Other words typed in Log food are sent, so Claude can sort them into foods to look up, numbers to add as they are, and a question, split the foods into amounts, and name a brand or restaurant. It does not see your targets, your log, or your weight. Logging a food from one of Healm's answers sends that food's name the same way. Healm's server looks each food up in fatsecret (brands and restaurants) and USDA FoodData Central; only a food neither knows takes Claude's estimate, marked Estimate on its row, for you to keep or change. The names and numbers of foods you saved go to Healm's server with it, so your own foods match first, and are not kept.</li>
 <li>A scan or label read sends the photos and a summary of your file.</li>
@@ -85,6 +85,7 @@
 
 <h2>Food and weight</h2>
 <p>Food tracking is optional. Your food log, targets, and weights stay on your phone. Weights come from what you type and from Apple Health, including a scale that syncs to it. If you allow notifications, one line about the day's food can arrive in the evening, worked out and scheduled on your phone, only on a day you logged something; you can turn it off in Settings. If your file names an eating disorder, Healm turns calorie and weight tracking off.</p>
+<p>If you tap Set a reminder on Today's bedtime suggestion, one reminder for that night is scheduled on your phone. Healm never sets one on its own.</p>
 
 <h2>Emergencies</h2>
 <p>Before any question is sent, Healm checks its words on your phone against a list of warning signs. If they suggest an emergency, Healm shows a Call 911 button at once. If they suggest thoughts of self-harm, Healm shows the 988 Suicide and Crisis Lifeline, to call or text. Healm never calls anyone for you, and no person watches conversations. A count of how often a warning sign matched is kept on your phone, without the words.</p>
