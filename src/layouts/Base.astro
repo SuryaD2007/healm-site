@@ -1,0 +1,47 @@
+---
+import '@/styles/global.css';
+import { url } from '@/lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  /** "dark" for the scan story, "auto" for privacy, support and terms. */
+  theme?: 'dark' | 'light' | 'auto';
+  noindex?: boolean;
+}
+
+const { title, description, theme = 'dark', noindex = false } = Astro.props;
+const themeColor = theme === 'light' ? '#FFFFFF' : '#0D1F22';
+
+// Instrument Serif, the app's display face (Healm/Resources/Fonts; SIL Open Font License, public/fonts/OFL.txt),
+// subset to Latin and punctuation as WOFF2.
+const fontFaces = `
+@font-face{font-family:"Instrument Serif";src:url("${url('fonts/InstrumentSerif-Regular.woff2')}") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Instrument Serif";src:url("${url('fonts/InstrumentSerif-Italic.woff2')}") format("woff2");font-weight:400;font-style:italic;font-display:swap}`;
+---
+<!doctype html>
+<html lang="en" class={`theme-${theme}`}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {theme === 'auto' ? (
+      <>
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0D1F22" />
+      </>
+    ) : (
+      <meta name="theme-color" content={themeColor} />
+    )}
+    <link rel="icon" href={url('brand/icon-dark.svg')} type="image/svg+xml" />
+    <link rel="preload" href={url('fonts/InstrumentSerif-Regular.woff2')} as="font" type="font/woff2" crossorigin />
+    <style is:inline set:html={fontFaces}></style>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,413 @@
+---
+import Base from '@/layouts/Base.astro';
+import ScanRing from '@/components/ScanRing.astro';
+import BreathSquare from '@/components/BreathSquare.astro';
+import Dial from '@/components/Dial.astro';
+import HealmMark from '@/components/HealmMark.astro';
+import { url } from '@/lib/url';
+
+type Swatch = { name: string; token: string; dark: string; light: string; job: string; contrast?: [string, string] };
+const colors: Swatch[] = [
+  { name: 'ground', token: '--ground', dark: '#0D1F22', light: '#FFFFFF', job: 'Screen background' },
+  { name: 'ink', token: '--ink', dark: '#ECF2EF', light: '#10302E', job: 'Primary text and icons', contrast: ['14.98', '14.15'] },
+  { name: 'ink2', token: '--ink2', dark: '#9FB3AE', light: '#5A6F6C', job: 'Secondary text', contrast: ['7.71', '5.35'] },
+  { name: 'surface', token: '--surface', dark: '#15292D', light: '#F1F5F3', job: 'Cards, the message field' },
+  { name: 'hairline', token: '--hairline', dark: '#223A3E', light: '#E1E8E5', job: 'Rules between rows, never a control edge' },
+  { name: 'controlBorder', token: '--control-border', dark: '#5E736F', light: '#889894', job: 'Edges of fields, chips, icon buttons', contrast: ['3.36', '3.01'] },
+  { name: 'action', token: '--action', dark: '#7FB6D1', light: '#1E5A78', job: 'The score arc, anything tappable', contrast: ['7.70', '7.53'] },
+  { name: 'signal', token: '--signal', dark: '#E0A35A', light: '#A86A1F', job: 'Flags and triage, amber never red', contrast: ['7.73', '4.42'] },
+  { name: 'signalTint', token: '--signal-tint', dark: '#1B2F33', light: '#FBF5EC', job: 'The triage callout only' },
+  { name: 'selection', token: '--selection', dark: '#1D343A', light: '#E8EEF2', job: 'A selected chip' },
+];
+const camera = [
+  { name: 'cameraBackdrop', value: '#121415', job: 'The scan screen’s ground' },
+  { name: 'scanTick', value: 'white 24%', swatch: 'rgb(255 255 255 / .24)', job: 'A tick not yet covered' },
+  { name: 'scanTickFilled', value: '#8FE3CF', job: 'A covered tick. The site’s one accent: it means scanned' },
+  { name: 'cameraGuide', value: '#FFFFFF', job: 'Guides, the countdown, the flash' },
+];
+const typeScale = [
+  { name: 'display', cls: 'display', size: '31 / 1.18 / −0.2', sample: '2 numbers moved together: resting heart rate up 5 and HRV down 21%.' },
+  { name: 'screenTitle', cls: 'font-serif text-screen-title', size: '30', sample: 'Skin' },
+  { name: 'cardTitle', cls: 'font-serif text-card-title', size: '22', sample: 'Set up food tracking' },
+  { name: 'body', cls: 'text-body', size: '17 regular', sample: 'On days you vaped, your resting heart rate was 5 bpm higher the next morning.' },
+  { name: 'bodyStrong', cls: 'text-body-strong', size: '16 medium', sample: 'Talk it through' },
+  { name: 'secondary', cls: 'text-secondary text-ink2', size: '15', sample: 'Track calories and protein against your plan.' },
+  { name: 'caption', cls: 'text-caption text-ink2', size: '13', sample: 'Wednesday, November 18' },
+  { name: 'micro', cls: 'text-micro text-ink2', size: '11', sample: 'Copy scan diagnostics' },
+];
+const spaces = [
+  ['xxs', 4], ['xs', 8], ['sm', 12], ['md', 16], ['lg', 24], ['xl', 32],
+] as const;
+const radii = [
+  ['pill', 24, 'Buttons, fields, chips'], ['card', 18, 'Cards'], ['callout', 14, 'The triage callout'], ['small', 8, 'Thumbnails'],
+] as const;
+const motion = [
+  { name: 'reveal', what: 'Something arriving', curve: 'reveal', ms: 400 },
+  { name: 'move', what: 'Content already on screen moving', curve: 'move', ms: 250 },
+  { name: 'step', what: 'Between screens: a spring, no overshoot', curve: 'step', ms: 0 },
+  { name: 'tickFill', what: 'A ring tick filling: a quick spring', curve: 'tick', ms: 0 },
+];
+---
+<Base title="Healm style preview" description="Healm's design tokens on the web, from the app's code." noindex>
+  <header class="wrap flex items-center justify-between gap-md py-lg">
+    <a href={url()} class="inline-flex items-center gap-sm text-ink no-underline">
+      <HealmMark size={22} />
+      <span class="font-serif text-card-title leading-none">Healm</span>
+    </a>
+    <p class="m-0 text-caption text-ink2">Style preview, not linked from the site</p>
+  </header>
+
+  <main id="main">
+    <!-- Opening: the ring, because it is the site's idea. -->
+    <section class="grain border-y border-hairline" style="background: var(--camera-backdrop)" aria-labelledby="ring-title">
+      <div class="wrap relative z-[2] grid items-center gap-2xl py-4xl md:grid-cols-[1fr_minmax(0,1.1fr)]">
+        <div class="max-w-[34rem]">
+          <h1 id="ring-title" class="m-0 font-serif text-section">The scan ring, from the app’s code</h1>
+          <p class="mt-lg text-lede text-ink2">
+            Sixty ticks, six degrees apart. Each fills on the tickFill spring with a short glow, at most fifteen a second,
+            behind a head turning once around. Then one pulse to 1.06. With Reduce Motion on, it’s a plain progress stroke,
+            just like the app.
+          </p>
+          <div class="mt-xl flex flex-wrap gap-sm">
+            <button type="button" class="btn btn-primary" data-ring-play>Scan again</button>
+            <button type="button" class="btn btn-secondary" data-ring-half>Fill half</button>
+            <button type="button" class="btn btn-secondary" data-ring-pulse>Pulse</button>
+          </div>
+          <dl class="mt-xl grid grid-cols-[auto_1fr] gap-x-xl gap-y-sm text-secondary">
+            <dt class="text-ink2">Ticks</dt><dd class="m-0 tabular">60 × 6°</dd>
+            <dt class="text-ink2">Tick</dt><dd class="m-0 tabular">12 × 3, filled 1.3×</dd>
+            <dt class="text-ink2">Pace</dt><dd class="m-0 tabular">15 a second, burst 3</dd>
+            <dt class="text-ink2">Pulse</dt><dd class="m-0 tabular">1.06 over 500 ms</dd>
+          </dl>
+          <p class="mt-md text-caption text-ink2">ScanEngine.swift, SkinScanView.swift, HealmMotion.swift</p>
+        </div>
+        <div class="justify-self-center w-full max-w-[520px]">
+          <ScanRing id="demo-ring" autoplay="visible" startAngle={200} label="Scan ring, filling as the head turns">
+            <div style="background: var(--ground)" aria-hidden="true"></div>
+          </ScanRing>
+        </div>
+      </div>
+    </section>
+
+    <!-- Color -->
+    <section class="wrap py-4xl" aria-labelledby="color-title">
+      <h2 id="color-title" class="m-0 font-serif text-section">Color</h2>
+      <p class="mt-md max-w-[40rem] text-ink2">
+        HealmColors.xcassets, light and dark. The number beside a color is its contrast on the ground. The site is dark by
+        default and light where a section reads better in daylight.
+      </p>
+      <div class="mt-2xl grid gap-xl md:grid-cols-2">
+        {(['dark', 'light'] as const).map((theme) => (
+          <div class={`theme-${theme} rounded-card border border-hairline p-lg`}>
+            <h3 class="m-0 text-body-strong">{theme === 'dark' ? 'Dark' : 'Light'}</h3>
+            <ul class="m-0 mt-md list-none p-0">
+              {colors.map((c) => (
+                <li class="grid grid-cols-[40px_1fr_auto] items-center gap-md border-t border-hairline py-sm">
+                  <span class="block h-10 w-10 rounded-small border border-hairline" style={`background:${theme === 'dark' ? c.dark : c.light}`}></span>
+                  <span class="min-w-0">
+                    <span class="block text-body-strong">{c.name}</span>
+                    <span class="block text-caption text-ink2">{c.job}</span>
+                  </span>
+                  <span class="text-right text-caption tabular">
+                    <span class="block">{theme === 'dark' ? c.dark : c.light}</span>
+                    {c.contrast && <span class="block text-ink2">{theme === 'dark' ? c.contrast[0] : c.contrast[1]}:1</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div class="mt-xl rounded-card border border-hairline p-lg" style="background: var(--camera-backdrop)">
+        <h3 class="m-0 text-body-strong">The same in both appearances, like the camera’s own</h3>
+        <ul class="m-0 mt-md grid list-none gap-md p-0 sm:grid-cols-2 lg:grid-cols-4">
+          {camera.map((c) => (
+            <li class="flex items-center gap-md">
+              <span class="block h-10 w-10 flex-none rounded-small border border-hairline" style={`background:${c.swatch ?? c.value}`}></span>
+              <span class="min-w-0">
+                <span class="block text-body-strong">{c.name} <span class="text-caption text-ink2 tabular">{c.value}</span></span>
+                <span class="block text-caption text-ink2">{c.job}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p class="mt-md mb-0 text-caption text-ink2">Mint stays on dark grounds: on white it is 1.49:1. Light signal is 4.42:1, so it marks dots and flags, never body text.</p>
+      </div>
+    </section>
+
+    <!-- Type -->
+    <section class="theme-light py-4xl" aria-labelledby="type-title">
+      <div class="wrap">
+        <h2 id="type-title" class="m-0 font-serif text-section">Type</h2>
+        <p class="mt-md max-w-[40rem] text-ink2">
+          Instrument Serif for what Healm says to you and for numbers; the system font for everything you read in passing.
+          Sizes are the app’s points. Sentence case everywhere, numbers in tabular figures.
+        </p>
+        <div class="mt-2xl border-t border-hairline">
+          <div class="grid gap-sm border-b border-hairline py-xl md:grid-cols-[12rem_1fr]">
+            <p class="m-0 text-caption text-ink2">hero <span class="tabular">46–128</span>, web</p>
+            <p class="m-0 font-serif text-hero">Read your health.</p>
+          </div>
+          <div class="grid gap-sm border-b border-hairline py-xl md:grid-cols-[12rem_1fr]">
+            <p class="m-0 text-caption text-ink2">section <span class="tabular">36–76</span>, web</p>
+            <p class="m-0 font-serif text-section">Ask it anything about today.</p>
+          </div>
+          {typeScale.map((t) => (
+            <div class="grid gap-sm border-b border-hairline py-lg md:grid-cols-[12rem_1fr]">
+              <p class="m-0 text-caption text-ink2">{t.name} <span class="tabular">{t.size}</span></p>
+              <p class={`m-0 max-w-[36rem] ${t.cls}`}>{t.sample}</p>
+            </div>
+          ))}
+          <div class="grid gap-sm py-lg md:grid-cols-[12rem_1fr]">
+            <p class="m-0 text-caption text-ink2">numeral <span class="tabular">72</span>, tabular</p>
+            <p class="m-0 font-serif text-numeral tabular">6,240 <span class="text-ink2">11,000</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Components, dark and light side by side -->
+    <section class="wrap py-4xl" aria-labelledby="components-title">
+      <h2 id="components-title" class="m-0 font-serif text-section">Components</h2>
+      <p class="mt-md max-w-[40rem] text-ink2">
+        Healm/Core/Design, rebuilt in CSS. No shadows and no gradients: hairlines and space carry the hierarchy. Every
+        target is at least 44 px.
+      </p>
+      <div class="mt-2xl grid gap-xl lg:grid-cols-2">
+        {(['dark', 'light'] as const).map((theme) => (
+          <div class={`theme-${theme} grid content-start gap-xl rounded-card border border-hairline p-lg sm:p-xl`}>
+            <h3 class="m-0 text-body-strong">{theme === 'dark' ? 'Dark' : 'Light'}</h3>
+
+            <div class="grid gap-sm">
+              <p class="m-0 text-caption text-ink2">Buttons: primary, secondary, text, icon</p>
+              <div class="grid gap-sm sm:grid-cols-2">
+                <button type="button" class="btn btn-primary">Join the waitlist</button>
+                <button type="button" class="btn btn-secondary">Not now</button>
+              </div>
+              <div class="flex flex-wrap items-center gap-sm">
+                <a class="btn-text" href="#components-title">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5h11a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H9l-3.5 3v-3H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2z"/><path d="M19 10h1a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1v2.5L16 18"/></svg>
+                  Talk it through
+                </a>
+                <button type="button" class="btn-icon is-bordered" aria-label="Send">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+                </button>
+                <button type="button" class="btn-icon" aria-label="Close">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+                <button type="button" class="btn btn-primary" disabled>Disabled</button>
+              </div>
+            </div>
+
+            <div class="grid gap-xs">
+              <p class="m-0 text-caption text-ink2">Chips: follow-ups and a choice</p>
+              <div class="flex flex-wrap gap-x-xs">
+                <button type="button" class="chip">Is this normal for me?</button>
+                <button type="button" class="chip" aria-pressed="true">Lose fat</button>
+                <button type="button" class="chip" aria-pressed="false">Build muscle</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="flex items-start justify-between gap-md">
+                <p class="m-0 font-serif text-card-title">Set up food tracking</p>
+                <button type="button" class="btn-icon -mr-sm -mt-sm" aria-label="Dismiss">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
+              </div>
+              <p class="mt-xs mb-0 text-secondary text-ink2">Track calories and protein against your plan.</p>
+              <button type="button" class="btn btn-primary mt-md w-full">Set up</button>
+            </div>
+
+            <div>
+              <div class="flex items-baseline justify-between border-t border-hairline pt-md">
+                <span class="text-body">Steps</span>
+                <span class="text-body tabular">6,240 of 11,000</span>
+              </div>
+              <div class="mt-sm h-[2px] w-full bg-hairline" aria-hidden="true"><div class="h-full w-[57%] bg-ink"></div></div>
+              <div class="mt-md flex items-center justify-between gap-md border-y border-hairline py-md">
+                <span><span class="block text-body">More today</span><span class="block text-secondary text-ink2">Your number, plan, outside, and more</span></span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="flex-none text-ink2" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+              </div>
+            </div>
+
+            <p class="callout m-0">Worth watching. If it keeps you up two nights running, mention it at your next visit.</p>
+
+            <div class="grid gap-xs">
+              <label class="text-body-strong" for={`email-${theme}`}>Email</label>
+              <input id={`email-${theme}`} class="field" type="email" name="email" autocomplete="email" spellcheck="false" placeholder="you@example.com…" />
+              <p class="m-0 text-caption text-ink2">One email when Healm is on the App Store. Nothing else.</p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-xl">
+              <Dial value={40} size={112} />
+              <a href="#components-title" class="inline-block" aria-label="Download on the App Store (preview, not linked yet)">
+                <img src={url('badges/app-store-black.svg')} alt="Download on the App Store" width="150" height="50" />
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Calm breath -->
+    <section class="border-y border-hairline py-4xl" aria-labelledby="breath-title">
+      <div class="wrap grid items-center gap-2xl md:grid-cols-2">
+        <div class="max-w-[30rem]">
+          <h2 id="breath-title" class="m-0 font-serif text-section">Calm breath</h2>
+          <p class="mt-md text-ink2">
+            The square from the app’s Calm breath. In up the left, hold across the top, out down the right, hold across the
+            bottom, four seconds each. It only moves after you press the button, the way motion in Healm answers a tap.
+          </p>
+          <p class="mt-md text-caption text-ink2">SessionView.swift (BreathSquare), HealmSize.breathSquare 200, breathSquareFade 600 ms</p>
+        </div>
+        <div class="grid gap-xl sm:grid-cols-2">
+          <div class="grid justify-items-center rounded-card border border-hairline py-xl">
+            <BreathSquare />
+          </div>
+          <div class="theme-light grid justify-items-center rounded-card py-xl">
+            <BreathSquare />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Motion -->
+    <section class="wrap py-4xl" aria-labelledby="motion-title">
+      <h2 id="motion-title" class="m-0 font-serif text-section">Motion</h2>
+      <p class="mt-md max-w-[40rem] text-ink2">
+        HealmMotion.swift. One ease-out for things arriving, one ease-in-out for things already there, springs that settle
+        without overshoot. Press play to compare.
+      </p>
+      <div class="mt-xl">
+        <button type="button" class="btn btn-secondary" data-motion-play>Play the curves</button>
+      </div>
+      <ul class="m-0 mt-xl list-none p-0">
+        {motion.map((m) => (
+          <li class="grid gap-sm border-t border-hairline py-md md:grid-cols-[12rem_1fr_minmax(0,2fr)] md:items-center">
+            <span class="text-body-strong">{m.name}</span>
+            <span class="text-secondary text-ink2">{m.what}</span>
+            <span class="relative block h-[44px]" aria-hidden="true">
+              <span class="absolute inset-x-0 top-1/2 h-px bg-hairline"></span>
+              <span class="absolute left-0 top-1/2 -mt-[6px] h-3 w-3 rounded-full bg-ink" data-motion-dot={m.curve}></span>
+            </span>
+          </li>
+        ))}
+        <li class="grid gap-sm border-y border-hairline py-md md:grid-cols-[12rem_1fr_minmax(0,2fr)] md:items-center">
+          <span class="text-body-strong">Done</span>
+          <span class="text-secondary text-ink2">The scan’s three rising haptic taps at 0, 120 and 240 ms, shown as light</span>
+          <span class="flex h-[44px] items-center gap-sm" aria-hidden="true">
+            <span class="h-2 w-2 rounded-full" style="background: var(--scan-tick-filled); opacity:.25" data-tap="0"></span>
+            <span class="h-2 w-2 rounded-full" style="background: var(--scan-tick-filled); opacity:.25" data-tap="1"></span>
+            <span class="h-2 w-2 rounded-full" style="background: var(--scan-tick-filled); opacity:.25" data-tap="2"></span>
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Space, radii, brand -->
+    <section class="theme-light py-4xl" aria-labelledby="space-title">
+      <div class="wrap grid gap-3xl lg:grid-cols-3">
+        <div>
+          <h2 id="space-title" class="m-0 font-serif text-screen-title">Space</h2>
+          <p class="mt-xs text-secondary text-ink2">A 4 point grid. HealmSpace.swift.</p>
+          <ul class="m-0 mt-lg grid list-none gap-sm p-0">
+            {spaces.map(([n, v]) => (
+              <li class="grid grid-cols-[3rem_1fr] items-center gap-md">
+                <span class="text-caption text-ink2 tabular">{n} {v}</span>
+                <span class="block h-3 bg-ink" style={`width:${v * 3}px`}></span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h2 class="m-0 font-serif text-screen-title">Corners</h2>
+          <p class="mt-xs text-secondary text-ink2">Continuous corners. HealmRadius.swift.</p>
+          <ul class="m-0 mt-lg grid list-none grid-cols-2 gap-md p-0">
+            {radii.map(([n, v, use]) => (
+              <li>
+                <span class="block h-20 border border-control-border bg-surface" style={`border-radius:${v}px`}></span>
+                <span class="mt-xs block text-caption"><span class="tabular">{n} {v}</span> <span class="text-ink2">{use}</span></span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h2 class="m-0 font-serif text-screen-title">Mark</h2>
+          <p class="mt-xs text-secondary text-ink2">The app icon’s H: two stems and one steady line, edge to edge. Every stroke 92 of 1024.</p>
+          <div class="mt-lg flex flex-wrap items-center gap-lg">
+            <HealmMark variant="tile" tone="light" size={88} label="Healm app icon, light" />
+            <HealmMark variant="tile" tone="dark" size={88} label="Healm app icon, dark" />
+            <span class="inline-flex items-center gap-sm">
+              <HealmMark size={28} />
+              <span class="font-serif text-screen-title leading-none">Healm</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap py-3xl" aria-labelledby="rules-title">
+      <h2 id="rules-title" class="m-0 font-serif text-screen-title">Rules carried from the app</h2>
+      <ul class="mt-md grid max-w-[44rem] gap-xs pl-lg text-secondary text-ink2">
+        <li>No shadows, no gradients, no emoji. Depth in dark sections comes from the 3D scene and a fixed grain.</li>
+        <li>Motion answers a tap or a scroll. The exceptions are the hero’s first scan and the breathing head.</li>
+        <li>Mint means scanned. It is the only accent, and it is never decoration.</li>
+        <li>Signal is amber, never red, and marks flags only.</li>
+        <li>Reduce Motion: no 3D motion, no pinning, no smooth scroll. The ring becomes a progress stroke.</li>
+      </ul>
+    </section>
+  </main>
+</Base>
+
+<script>
+  import { reveal, move, spring, prefersReducedMotion } from '@/lib/motion';
+  import type { HealmScanRing } from '@/scripts/scan-ring';
+
+  const ring = document.getElementById('demo-ring') as HealmScanRing | null;
+  document.querySelector('[data-ring-play]')?.addEventListener('click', () => ring?.play());
+  document.querySelector('[data-ring-half]')?.addEventListener('click', () => {
+    ring?.reset();
+    ring?.setProgress(0.5);
+  });
+  document.querySelector('[data-ring-pulse]')?.addEventListener('click', () => ring?.pulse());
+
+  // The curves, side by side, on one press. Nothing moves under Reduce Motion; the dots jump to the end.
+  const dots = [...document.querySelectorAll<HTMLElement>('[data-motion-dot]')];
+  const taps = [...document.querySelectorAll<HTMLElement>('[data-tap]')];
+  const step = spring(0.4, 1);
+  const tick = spring(0.28, 0.72);
+  const curves: Record<string, { f: (t: number) => number; d: number }> = {
+    reveal: { f: (t) => reveal(t / 0.4), d: 0.4 },
+    move: { f: (t) => move(t / 0.25), d: 0.25 },
+    step: { f: step.value, d: step.duration },
+    tick: { f: tick.value, d: tick.duration },
+  };
+  let raf = 0;
+  document.querySelector('[data-motion-play]')?.addEventListener('click', () => {
+    cancelAnimationFrame(raf);
+    const reduced = prefersReducedMotion();
+    const start = performance.now();
+    // Measure once per press, never inside the frame loop.
+    const tracks = dots.map((dot) => (dot.parentElement?.clientWidth ?? 0) - dot.offsetWidth);
+    const frame = (now: number) => {
+      const t = (now - start) / 1000;
+      let busy = false;
+      dots.forEach((dot, i) => {
+        const c = curves[dot.dataset.motionDot ?? 'reveal'];
+        const p = reduced ? 1 : c.f(Math.min(t, c.d));
+        dot.style.transform = `translateX(${(p * tracks[i]).toFixed(1)}px)`;
+        if (t < c.d) busy = true;
+      });
+      taps.forEach((tap, i) => {
+        const since = t - i * 0.12;
+        const on = since >= 0 && since < 0.3;
+        tap.style.opacity = on ? String(0.45 + 0.2 * (i + 1)) : '0.25';
+        tap.style.transform = on && !reduced ? `scale(${1.2 + 0.25 * i})` : '';
+        if (t < 0.6) busy = true;
+      });
+      if (busy) raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+  });
+</script>
