@@ -2,6 +2,7 @@
 import Base from '@/layouts/Base.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
 import Hero from '@/components/Hero.astro';
+import WaitlistForm from '@/components/WaitlistForm.astro';
 ---
 <!-- noindex until the page is complete (step 5 adds the SEO and the sitemap entry). -->
 <Base
@@ -20,9 +21,16 @@ import Hero from '@/components/Hero.astro';
         <h2 class="m-0 mt-sm font-serif text-section">The scan chapters come next.</h2>
       </div>
     </section>
-    <section id="download" class="theme-dark border-t border-hairline">
-      <div class="wrap py-4xl">
-        <h2 class="m-0 font-serif text-section">The waitlist goes here.</h2>
+    <!-- Chapter 7 (step 4) wraps this in the last ring; the form itself is final. -->
+    <section id="download" class="theme-dark border-t border-hairline" aria-labelledby="download-title">
+      <div class="wrap grid gap-2xl py-4xl md:grid-cols-2 md:items-end">
+        <div>
+          <h2 id="download-title" class="m-0 font-serif text-section">Get Healm first.</h2>
+          <p class="mt-md max-w-[30rem] text-lede text-ink2">
+            Healm is coming to the App Store. Leave your email and you’ll hear the day it lands.
+          </p>
+        </div>
+        <WaitlistForm />
       </div>
     </section>
   </main>

@@ -37,8 +37,15 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
       <span class="hero-r">Healm reads&nbsp;it.</span>
     </h1>
 
-    <div class="hero-stage" data-stage>
-      <div class="hero-scene" role="img" aria-label="A head drawn in scan lines turns toward you while Healm’s scan ring fills around it.">
+    <div
+      class="hero-stage"
+      data-stage
+      tabindex="0"
+      role="group"
+      aria-label="Scan"
+      aria-describedby="scan-help"
+    >
+      <div class="hero-scene" role="img" aria-label="A head drawn in scan lines, inside Healm’s scan ring. The ring fills in whichever direction the head turns.">
         {poster && (
           <picture class="hero-poster">
             <source media="(max-width: 767px)" type="image/avif" srcset={poster.mobileAvif} sizes="min(88vw, 440px)" />
@@ -58,6 +65,20 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
       </button>
     </div>
 
+    <!-- Under the ring: the hint, then "Scan complete", and the two ways to run it. -->
+    <div class="hero-scanbar">
+      <p class="hero-status" data-scan-status aria-hidden="true"></p>
+      <div class="hero-scan-actions">
+        <button type="button" class="btn-text hero-scan-button" data-scan-auto>Auto scan</button>
+        <button type="button" class="btn-text hero-scan-button" data-scan-again hidden>Scan again</button>
+      </div>
+      <p id="scan-help" class="sr-only">
+        Use the arrow keys to turn the head. Each direction fills part of the ring, as in Healm’s face scan. Or
+        choose Auto scan to run it by itself.
+      </p>
+      <p class="sr-only" data-scan-live role="status" aria-live="polite"></p>
+    </div>
+
     <div class="hero-aside">
       <p class="hero-lede">
         An iPhone app that scans your skin, hair and body, reads your Apple Health each morning, and explains
@@ -70,7 +91,7 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
           </a>
         ) : (
           <>
-            <a class="btn btn-primary" href="#download">Join the waitlist</a>
+            <a class="btn btn-primary hero-join" href="#download" data-hero-cta>Join the waitlist</a>
             <p class="hero-note">Coming to the App Store. Free to use.</p>
           </>
         )}
@@ -125,6 +146,63 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
   .hero-stage:global(.is-live) :global(.hero-poster) { opacity: 0; }
   .hero-stage :global(.hero-ring) { pointer-events: none; }
 
+  /* The stage takes the arrow keys; its focus ring is the ring's own circle. */
+  .hero-stage:focus-visible {
+    outline: 2px solid var(--action);
+    outline-offset: 4px;
+    border-radius: 50%;
+  }
+
+  /* Under the ring: one line of status and the scan buttons. Space is kept so nothing shifts. */
+  .hero-scanbar {
+    grid-row: 2;
+    display: grid;
+    justify-items: center;
+    gap: 0;
+    min-height: calc(var(--size-tap) + 1.5em);
+    margin-top: calc(-1 * var(--space-md));
+    text-align: center;
+  }
+  .hero-status {
+    margin: 0;
+    min-height: 1.5em;
+    color: var(--ink2);
+    font-size: var(--type-secondary);
+    opacity: 0;
+    transition: opacity var(--dur-reveal) var(--ease-reveal);
+  }
+  .hero-status:global(.is-shown) { opacity: 1; }
+  :global(.hero.is-scanned) .hero-status { color: var(--ink); }
+  .hero-scan-actions { display: flex; gap: var(--space-md); justify-content: center; }
+  .hero-scan-button { font-size: var(--type-secondary); }
+  .hero-scan-button[hidden] { display: none; }
+
+  /* After the scan, the waitlist button glows once: a mint ring that opens out and fades, like the
+     scan ring's pulse. An outline, not a shadow. */
+  .hero-join { position: relative; }
+  .hero-join::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    border: 2px solid var(--scan-tick-filled);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .hero-join:global(.is-glowing)::after { animation: hero-glow 1100ms var(--ease-reveal) both; }
+  @keyframes hero-glow {
+    0% { opacity: 0; transform: scale(1); }
+    25% { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 0; transform: scale(1.12, 1.35); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-join:global(.is-glowing)::after { animation: hero-glow-still 1400ms linear both; }
+    @keyframes hero-glow-still {
+      0%, 100% { opacity: 0; }
+      30%, 60% { opacity: 1; }
+    }
+  }
+
   /* Pause for the moving head (WCAG 2.2.2). Quiet, in the stage's corner, only while the 3D is live. */
   .hero-pause {
     position: absolute;
@@ -141,7 +219,7 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
   .hero-pause.is-paused .icon-pause { display: none; }
 
   .hero-title {
-    grid-row: 2;
+    grid-row: 3;
     margin: 0;
     max-width: 14ch;
     text-align: center;
@@ -154,7 +232,7 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
   .hero-l, .hero-r { display: block; }
 
   .hero-aside {
-    grid-row: 3;
+    grid-row: 4;
     display: grid;
     justify-items: center;
     text-align: center;
@@ -225,11 +303,12 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
       max-width: calc(1600px + 2 * var(--gutter));
       container-type: inline-size;
       grid-template-columns: 1fr var(--stage) 1fr;
-      grid-template-rows: 1fr auto auto 1fr;
+      grid-template-rows: 1fr auto auto 1fr auto;
       gap: 0;
       justify-items: stretch;
     }
-    .hero-stage { grid-column: 2; grid-row: 1 / -1; }
+    .hero-stage { grid-column: 2; grid-row: 1 / 5; }
+    .hero-scanbar { grid-column: 2; grid-row: 5; margin-top: calc(-1 * var(--space-lg)); }
     .hero-title {
       grid-row: 2;
       grid-column: 1 / -1;
@@ -270,6 +349,7 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
   :global(html.poster-mode) .hero { padding: 0; min-height: 0; display: block; }
   :global(html.poster-mode) .hero::after,
   :global(html.poster-mode) .hero-title,
+  :global(html.poster-mode) .hero-scanbar,
   :global(html.poster-mode) .hero-foot,
   :global(html.poster-mode .hero-ring),
   :global(html.poster-mode .hero-pause),

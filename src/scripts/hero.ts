@@ -1,13 +1,17 @@
 /**
- * The hero: the scan ring fills around the head once, the way the app's does, then pulses.
+ * The hero: the visitor does the scan (src/scripts/hero-scan.ts).
+ *
+ *   - Mouse (hover and a fine pointer): the ring starts empty. The head turns toward the cursor and the
+ *     ring fills in the direction it points. A hint until filling starts; an idle demo after 8 seconds.
+ *   - Touch and everything else: once the hero is on screen the head turns once around by itself and the
+ *     ring fills behind it, in about 4 to 5 seconds. No hints, no dragging, no tilt.
+ *   - Keyboard: arrow keys on the focused stage; the Auto scan button runs it by itself.
+ *   - Reduce Motion: no 3D and no turning; Auto scan fills the ring as a plain progress stroke.
  *
  * First paint is the static render of the scene (src/assets/hero/poster-*.png, made by
- * scripts/render-poster.mjs from this same scene). The live 3D scene loads after that:
- *   - desktop: right after first paint, and the ring waits up to 1.8 s for it, so the head lights up tick
- *     by tick as the ring fills;
- *   - phone: on the first touch or scroll, or 2.5 s after load, so loading never competes with the page;
- *   - never under Reduce Motion, without WebGL 2, with Save-Data on, or on a device with two cores or less.
- * If it runs slowly once loaded, it hands back to the static render.
+ * scripts/render-poster.mjs). The live scene loads after first paint, never under Reduce Motion, without
+ * WebGL 2, with Save-Data on, or on a device with two cores or less; if it runs slowly it hands back to
+ * the static render. Without the 3D, the scan still works: the ring fills from the same heading.
  *
  * ?poster=desktop or ?poster=mobile renders only the scene, frozen, for the static render.
  */
@@ -15,7 +19,7 @@ import { prefersReducedMotion } from '@/lib/motion';
 import type { HealmScanRing } from '@/scripts/scan-ring';
 import type { HeadPoints } from '@/three/head';
 import type { SceneHandle } from '@/three/HeadScene';
-import { sound } from '@/scripts/sound';
+import { HeroScan } from '@/scripts/hero-scan';
 
 const DESKTOP_POINTS = 22000;
 const PHONE_POINTS = 10000;
@@ -60,30 +64,37 @@ function afterFirstPaint(fn: () => void) {
   );
 }
 
-function onFirstInteraction(fn: () => void, fallbackMs: number) {
-  let done = false;
-  const events = ['pointerdown', 'touchstart', 'scroll', 'keydown', 'pointermove'] as const;
-  const run = () => {
-    if (done) return;
-    done = true;
-    events.forEach((e) => window.removeEventListener(e, run));
-    fn();
-  };
-  events.forEach((e) => window.addEventListener(e, run, { passive: true, once: true }));
-  const later = () => setTimeout(() => afterFirstPaint(run), fallbackMs);
-  if (document.readyState === 'complete') later();
-  else window.addEventListener('load', later, { once: true });
+function afterLoad(fn: () => void) {
+  if (document.readyState === 'complete') afterFirstPaint(fn);
+  else window.addEventListener('load', () => afterFirstPaint(fn), { once: true });
 }
 
 if (hero) {
   const stage = hero.querySelector<HTMLElement>('[data-stage]')!;
   const mount = hero.querySelector<HTMLElement>('[data-canvas]')!;
-  const ring = hero.querySelector<HealmScanRing>('healm-scan-ring');
+  const ring = hero.querySelector<HealmScanRing>('healm-scan-ring')!;
   const pause = hero.querySelector<HTMLButtonElement>('[data-motion-toggle]');
+  const reduced = prefersReducedMotion();
+  const mouse = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const phone = matchMedia('(max-width: 767px)').matches;
   let scene: SceneHandle | null = null;
-  let ringStarted = false;
   let paused = false;
+
+  const scan = posterMode
+    ? null
+    : new HeroScan(
+        {
+          hero,
+          stage,
+          ring,
+          status: hero.querySelector<HTMLElement>('[data-scan-status]')!,
+          live: hero.querySelector<HTMLElement>('[data-scan-live]')!,
+          autoButton: hero.querySelector<HTMLButtonElement>('[data-scan-auto]')!,
+          againButton: hero.querySelector<HTMLButtonElement>('[data-scan-again]')!,
+          cta: hero.querySelector<HTMLElement>('[data-hero-cta]'),
+        },
+        { mouse, reduced },
+      );
 
   // The head moves for as long as the page is open, so it gets a pause (WCAG 2.2.2). The label says what
   // the button will do.
@@ -93,28 +104,6 @@ if (hero) {
     pause.classList.toggle('is-paused', paused);
     const label = pause.querySelector('[data-label]');
     if (label) label.textContent = paused ? 'Play the moving head' : 'Pause the moving head';
-  });
-
-  const startRing = () => {
-    if (ringStarted || !ring) return;
-    ringStarted = true;
-    ring.play();
-  };
-
-  ring?.addEventListener('ringtick', (e) => {
-    scene?.tick((e as CustomEvent<number>).detail);
-    sound.tick();
-  });
-  ring?.addEventListener('ringcomplete', () => {
-    scene?.pulse();
-    sound.complete();
-    hero.classList.add('is-scanned');
-  });
-  // Turning sound on while the hero is in view plays the scan again, so there is something to hear.
-  sound.addEventListener('change', () => {
-    if (!sound.enabled || !ring) return;
-    const r = hero.getBoundingClientRect();
-    if (r.bottom > 0 && r.top < innerHeight) ring.play();
   });
 
   const loadScene = async (count: number, poster = false) => {
@@ -128,12 +117,14 @@ if (hero) {
           onReady: () => {
             stage.classList.add('is-live');
             if (pause && !poster) pause.hidden = false;
+            if (scan) scan.scene = scene;
             resolve();
           },
           onSlow: () => {
-            // Back to the static render, on the reveal curve, then free the GPU.
+            // Back to the static render, on the reveal curve, then free the GPU. The scan keeps working.
             stage.classList.remove('is-live');
             if (pause) pause.hidden = true;
+            if (scan) scan.scene = null;
             setTimeout(() => {
               scene?.destroy();
               scene = null;
@@ -143,30 +134,39 @@ if (hero) {
       });
       if (poster) document.title = 'poster-ready';
     } catch (error) {
-      // The static render is already on screen, so visitors see no difference.
+      // The static render is already on screen and the ring still scans, so visitors see no difference.
       if (import.meta.env.DEV) console.warn('[hero] 3D scene did not load', error);
     }
+  };
+
+  /** Runs once the hero is mostly on screen. */
+  const whenOnScreen = (fn: () => void) => {
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.intersectionRatio >= 0.5)) {
+        io.disconnect();
+        fn();
+      }
+    }, { threshold: [0, 0.5, 1] });
+    io.observe(stage);
   };
 
   if (posterMode) {
     document.documentElement.classList.add('poster-mode', `poster-${posterMode}`);
     loadScene(posterMode === 'mobile' ? PHONE_POINTS : DESKTOP_POINTS, true);
-  } else if (prefersReducedMotion()) {
-    // The app's Reduce Motion ring: one progress stroke, shown full. Nothing moves.
-    startRing();
-  } else if (!canRun3D()) {
-    afterFirstPaint(() => setTimeout(startRing, 400));
-  } else if (phone) {
-    afterFirstPaint(() => setTimeout(startRing, 500));
-    onFirstInteraction(() => loadScene(PHONE_POINTS), 2500);
-  } else {
-    afterFirstPaint(() => {
-      const fallback = setTimeout(startRing, 1800);
-      loadScene(DESKTOP_POINTS).then(() => {
-        clearTimeout(fallback);
-        // Let the crossfade land before the first tick.
-        setTimeout(startRing, 350);
+  } else if (scan) {
+    const with3D = canRun3D();
+    const ready = with3D ? new Promise<void>((resolve) => afterLoad(() => loadScene(phone ? PHONE_POINTS : DESKTOP_POINTS).then(resolve))) : Promise.resolve();
+    if (reduced) {
+      // Nothing moves by itself. Auto scan is there for anyone who wants to see the ring fill.
+    } else if (mouse) {
+      whenOnScreen(() => scan.armDemo());
+    } else {
+      // Phones and tablets: the scan runs by itself once the hero is on screen and the head is there,
+      // or after 2.5 seconds without it.
+      whenOnScreen(() => {
+        const start = () => setTimeout(() => scan.startAuto(), 400);
+        Promise.race([ready, new Promise((r) => setTimeout(r, 2500))]).then(start);
       });
-    });
+    }
   }
 }

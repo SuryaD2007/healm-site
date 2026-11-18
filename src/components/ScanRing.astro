@@ -7,12 +7,14 @@ interface Props {
   autoplay?: 'visible';
   startAngle?: number;
   check?: boolean;
+  /** A small confirmation ring that fills in under a second. */
+  quick?: boolean;
   label?: string;
   decorative?: boolean;
   class?: string;
   id?: string;
 }
-const { autoplay, startAngle, check = false, label, decorative = false, class: className, id } = Astro.props;
+const { autoplay, startAngle, check = false, quick = false, label, decorative = false, class: className, id } = Astro.props;
 ---
 <healm-scan-ring
   id={id}
@@ -20,6 +22,7 @@ const { autoplay, startAngle, check = false, label, decorative = false, class: c
   autoplay={autoplay}
   start-angle={startAngle}
   check={check ? '' : undefined}
+  quick={quick ? '' : undefined}
   label={label}
   decorative={decorative ? '' : undefined}
 >

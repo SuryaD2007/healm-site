@@ -1,7 +1,9 @@
 /**
- * The hero's 3D scene: the head as points, lit softly, breathing on Calm breath's rhythm and turning
- * a little toward the cursor (or the phone's tilt). When the scan ring fills a tick, the points in that
- * direction light up mint and settle back, so the ring visibly reads the head.
+ * The hero's 3D scene: the head drawn in scan lines, lit softly, breathing on Calm breath's rhythm. It
+ * turns where the scan (src/scripts/hero-scan.ts) points it: toward the cursor, the arrow keys, or the
+ * scan that runs by itself. When the ring fills a tick, the scan lines in that direction light mint and
+ * settle to a faint tint, so the head shows what has been scanned; when the scan completes, the head
+ * pulses once and the tint fades.
  *
  * Loaded lazily by src/scripts/hero.ts after first paint, never under Reduce Motion, without WebGL, or
  * on a slow device. It pauses whenever it is off screen or the tab is hidden.
@@ -13,22 +15,25 @@ import { createRoot } from 'react-dom/client';
 import * as THREE from 'three';
 import type { HeadPoints } from './head';
 
-/** Where the head rests: a quarter turn of a quarter, so the nose and brow show depth. */
-const BASE_YAW = -0.4;
+/** Where the head rests: facing forward, a touch off square so it does not look frozen. */
+const BASE_YAW = -0.1;
 const BASE_PITCH = 0;
-/** How far the cursor can turn it (radians). */
-const LOOK_YAW = 0.32;
-const LOOK_PITCH = 0.12;
+/** How much of a scanned direction's mint stays on the head until the scan completes. */
+const SCANNED_TINT = 0.22;
 /** Point size in CSS pixels on a 600 px stage; it scales with the stage. */
 const POINT_SIZE = 2.1;
 /** Calm breath: 4 s in and 4 s out (the holds are left out so the head never freezes). */
 const BREATH_SECONDS = 8;
 
 export interface SceneHandle {
+  /** Where the head points, in the scan's degrees (src/lib/scan.ts): right and up from straight ahead. */
+  look(right: number, up: number): void;
   /** A ring tick filled (0...59, clockwise from the top). */
   tick(index: number): void;
-  /** The ring finished: one soft pulse of light over the head. */
+  /** The ring finished: one soft pulse of light over the head, then the scanned tint fades. */
   pulse(): void;
+  /** A new scan: no ticks lit. */
+  reset(): void;
   /** Light a region (see REGION in head.ts) from 0 to 1, for the scan chapter. */
   setRegion(region: number, amount: number): void;
   /** Hold the head still on its current frame (the pause button, WCAG 2.2.2), or let it move again. */
@@ -65,7 +70,8 @@ function createBus(poster: boolean) {
     ticks: new Float32Array(60).fill(-1),
     regions: new Float32Array(8),
     pulseAt: -100,
-    pointer: { x: 0, y: 0, last: -100 },
+    /** Radians, from the scan's heading. */
+    look: { yaw: 0, pitch: 0 },
   };
 }
 type Bus = ReturnType<typeof createBus>;
@@ -114,6 +120,7 @@ const vertexShader = /* glsl */ `
   uniform float uTicks[60];
   uniform float uRegions[8];
   uniform float uPulse;
+  uniform float uScanned;
   uniform float uGain;
   uniform vec3 uInk;
   uniform vec3 uCool;
@@ -143,7 +150,8 @@ const vertexShader = /* glsl */ `
     if (angle < 0.0) angle += 360.0;
     int tick = int(mod(floor(angle / 6.0 + 0.5), 60.0));
     float filled = uTicks[tick];
-    float glow = filled < 0.0 ? 0.0 : exp(-max(uTime - filled, 0.0) * 1.7) * step(filled, uTime + 0.001);
+    // A bright flash as the tick fills, settling to a faint tint for as long as the scan runs.
+    float glow = filled < 0.0 ? 0.0 : max(exp(-max(uTime - filled, 0.0) * 1.7), uScanned) * step(filled, uTime + 0.001);
     glow = max(glow, uRegions[int(aRegion + 0.5)]);
     glow = max(glow, uPulse * (0.35 + 0.65 * front));
 
@@ -186,7 +194,7 @@ function color(hex: string) {
 function Head({ data, bus, onFirstFrame }: { data: HeadPoints; bus: Bus; onFirstFrame: () => void }) {
   const group = useRef<THREE.Group>(null);
   const firstFrame = useRef(false);
-  const look = useRef({ yaw: 0, pitch: 0, vYaw: 0, vPitch: 0 });
+  const look = useRef({ yaw: 0, pitch: 0 });
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
 
@@ -221,6 +229,7 @@ function Head({ data, bus, onFirstFrame }: { data: HeadPoints; bus: Bus; onFirst
           uTicks: { value: bus.ticks },
           uRegions: { value: bus.regions },
           uPulse: { value: 0 },
+          uScanned: { value: SCANNED_TINT },
           uOpacity: { value: 1 },
           uGain: { value: 1 },
           // The app's ink, action and scanTickFilled (src/styles/tokens.css).
@@ -246,29 +255,24 @@ function Head({ data, bus, onFirstFrame }: { data: HeadPoints; bus: Bus; onFirst
     material.dispose();
   }, [geometry, material]);
 
-  useFrame((_, delta) => {
+  useFrame(() => {
     const t = bus.now();
-    const dt = Math.min(delta, 1 / 30);
     material.uniforms.uTime.value = t;
-    material.uniforms.uPulse.value = t >= bus.pulseAt ? 0.55 * Math.exp(-(t - bus.pulseAt) * 2.4) : 0;
+    const sincePulse = t - bus.pulseAt;
+    material.uniforms.uPulse.value = sincePulse >= 0 ? 0.55 * Math.exp(-sincePulse * 2.4) : 0;
+    // The scanned tint holds until the pulse, then fades over about a second and a half.
+    material.uniforms.uScanned.value = sincePulse >= 0 ? SCANNED_TINT * Math.exp(-sincePulse * 2.2) : SCANNED_TINT;
 
-    // Look toward the pointer on a critically damped spring (response 0.9 s, like the app's step).
-    // With no pointer for 4 s, it drifts back to a slow sway.
-    const p = bus.pointer;
-    const idle = t - p.last > 4;
-    const tx = bus.poster ? 0 : idle ? 0.35 * Math.sin(t / 6) : p.x;
-    const ty = bus.poster ? 0 : idle ? 0.15 * Math.sin(t / 9) : p.y;
-    const w = (2 * Math.PI) / 0.9;
+    // The scan already springs the heading (src/lib/scan.ts, HeadingSpring), so the head takes it as is.
+    // Face right is +yaw; face up is -pitch.
     const l = look.current;
-    l.vYaw += (w * w * (tx * LOOK_YAW - l.yaw) - 2 * w * l.vYaw) * dt;
-    l.vPitch += (w * w * (ty * LOOK_PITCH - l.pitch) - 2 * w * l.vPitch) * dt;
-    l.yaw += l.vYaw * dt;
-    l.pitch += l.vPitch * dt;
+    l.yaw = bus.poster ? 0 : bus.look.yaw;
+    l.pitch = bus.poster ? 0 : bus.look.pitch;
 
     const g = group.current;
     if (g) {
       const breath = 0.5 - 0.5 * Math.cos((2 * Math.PI * t) / BREATH_SECONDS);
-      g.rotation.set(BASE_PITCH + l.pitch, BASE_YAW + l.yaw, 0);
+      g.rotation.set(BASE_PITCH - l.pitch, BASE_YAW + l.yaw, 0);
       g.scale.setScalar(1 + 0.012 * breath);
       g.position.y = -0.05 + 0.03 * Math.sin((2 * Math.PI * t) / 11);
     }
@@ -320,36 +324,22 @@ export function mountHeadScene(opts: SceneOptions): SceneHandle {
   const visibility = createVisibility(opts.container);
   const root = createRoot(opts.container);
   root.render(<Scene opts={opts} bus={bus} visibility={visibility} />);
-
-  const onPointer = (e: PointerEvent) => {
-    if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
-    bus.pointer.x = Math.max(-1, Math.min(1, (e.clientX / window.innerWidth) * 2 - 1));
-    bus.pointer.y = Math.max(-1, Math.min(1, (e.clientY / window.innerHeight) * 2 - 1));
-    bus.pointer.last = bus.now();
-  };
-  // The phone's tilt, where it needs no permission prompt (Android). iOS asks first, so it keeps the sway.
-  const onTilt = (e: DeviceOrientationEvent) => {
-    if (e.gamma == null || e.beta == null) return;
-    bus.pointer.x = Math.max(-1, Math.min(1, e.gamma / 25));
-    bus.pointer.y = Math.max(-1, Math.min(1, (e.beta - 50) / 25));
-    bus.pointer.last = bus.now();
-  };
-  const tiltNeedsPermission =
-    typeof DeviceOrientationEvent !== 'undefined' &&
-    typeof (DeviceOrientationEvent as unknown as { requestPermission?: unknown }).requestPermission === 'function';
-  if (!opts.poster) {
-    window.addEventListener('pointermove', onPointer, { passive: true });
-    if (!tiltNeedsPermission && matchMedia('(pointer: coarse)').matches) {
-      window.addEventListener('deviceorientation', onTilt, { passive: true });
-    }
-  }
+  const rad = Math.PI / 180;
 
   return {
+    look(right, up) {
+      bus.look.yaw = right * rad;
+      bus.look.pitch = up * rad;
+    },
     tick(index) {
       if (index >= 0 && index < 60) bus.ticks[index] = bus.now();
     },
     pulse() {
       bus.pulseAt = bus.now();
+    },
+    reset() {
+      bus.ticks.fill(-1);
+      bus.pulseAt = -100;
     },
     setRegion(region, amount) {
       bus.regions[region] = amount;
@@ -359,8 +349,6 @@ export function mountHeadScene(opts: SceneOptions): SceneHandle {
       visibility.setPaused(paused);
     },
     destroy() {
-      window.removeEventListener('pointermove', onPointer);
-      window.removeEventListener('deviceorientation', onTilt);
       visibility.destroy();
       root.unmount();
     },

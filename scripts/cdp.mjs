@@ -12,15 +12,16 @@ import { join } from 'node:path';
 const CHROME = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-export async function launch({ width = 1440, height = 900, scale = 1, mobile = false, reducedMotion = false, port = 9333 } = {}) {
+export async function launch({ width = 1440, height = 900, scale = 1, mobile = false, reducedMotion = false, webgl = true, port = 9333 } = {}) {
   const profile = mkdtempSync(join(tmpdir(), 'healm-chrome-'));
+  const gl = webgl
+    ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
+    : ['--disable-webgl', '--disable-webgl2', '--disable-3d-apis'];
   const proc = spawn(CHROME, [
     '--headless=new',
     `--remote-debugging-port=${port}`,
     `--user-data-dir=${profile}`,
-    '--use-angle=swiftshader',
-    '--enable-unsafe-swiftshader',
-    '--ignore-gpu-blocklist',
+    ...gl,
     '--hide-scrollbars',
     '--no-first-run',
     '--no-default-browser-check',
@@ -53,7 +54,7 @@ export async function launch({ width = 1440, height = 900, scale = 1, mobile = f
   const send = (method, params = {}) =>
     new Promise((resolve, reject) => {
       const n = ++id;
-      pending.set(n, { resolve, reject });
+      pending.set(n, { resolve, reject: (e) => reject(new Error(`${method}: ${e.message} ${JSON.stringify(params).slice(0, 200)}`)) });
       ws.send(JSON.stringify({ id: n, method, params }));
     });
 
@@ -78,6 +79,10 @@ export async function launch({ width = 1440, height = 900, scale = 1, mobile = f
     send,
     evaluate,
     logs,
+    /** Listen for a protocol event, such as Fetch.requestPaused. */
+    on(method, fn) {
+      listeners.push((m) => m.method === method && fn(m.params));
+    },
     async goto(url) {
       await send('Page.navigate', { url });
       for (let i = 0; i < 100; i++) {
