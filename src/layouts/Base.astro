@@ -43,5 +43,11 @@ const fontFaces = `
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <slot />
+    <script>
+      import { startCursor } from '@/scripts/cursor';
+      import { bindSoundToggles } from '@/scripts/sound';
+      startCursor();
+      bindSoundToggles();
+    </script>
   </body>
 </html>

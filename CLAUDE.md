@@ -13,10 +13,20 @@ URL, because App Review links to it.
 - Tailwind CSS 4, driven by `src/styles/tokens.css`. Plain CSS components live in `src/styles/global.css`.
 - Interactive pieces are small custom elements in `src/scripts/` (no framework). React islands only where React
   earns it: the 3D scan scene (React Three Fiber + drei, lazy-loaded after first paint).
+- Every component is written here from the app's own code. No component libraries (no React Bits, no
+  Aceternity, no shadcn registries), and nothing copied from one.
 - GSAP + ScrollTrigger for the scroll chapters, Lenis for smooth scrolling, Motion for micro-interactions.
 - No other heavy library without asking the owner.
 - Commands: `npm run dev` (Astro 7 runs it as a daemon: `npx astro dev stop` / `status` / `logs`),
-  `npm run build`, `npm run check`.
+  `npm run build`, `npm run check`, `npm run poster` (with the dev server running).
+- The hero's 3D: `src/three/head.ts` builds a generic bust from simple shapes and samples it as scan lines
+  (seeded, so it is the same every time); `src/three/HeadScene.tsx` draws it; `src/scripts/hero.ts` decides
+  when to load it. Change anything that affects the first frame (shape, camera, light, point size), then run
+  `npm run poster` so the static render (`src/assets/hero/`) matches the live scene again.
+- `src/three` is excluded from Astro's React plugin (astro.config.mjs) because it is mounted by hand, not as
+  an island; Fast Refresh would fail there in dev.
+- `scripts/cdp.mjs` drives headless Chrome with software WebGL for renders and checks. The gstack browse
+  binary has no WebGL, so it only ever sees the static fallback.
 - Packages are pinned exactly, each at least two weeks old when added. See docs/SKILLS.md.
 
 ## Design rules (from the app)
@@ -44,6 +54,20 @@ Swift file it came from. Change the app first, then the tokens.
 - Mobile first: perfect at 375 px with no sideways scroll. Fewer points and shorter pins on phones.
 - Budgets: Lighthouse mobile 90+ and desktop 95+ for performance, 95+ for accessibility, best practices and SEO.
   First load under 1.5 MB; the 3D chunk is lazy.
+
+## Contact
+
+- The contact email is **gethealm@gmail.com**, set once in `src/lib/site.ts` and used everywhere (also in the
+  old `index.html`, `privacy.html` and `terms.html`).
+- **When the owner buys a domain, switch to an address on it**: change `src/lib/site.ts`, search the repo for
+  `gethealm@gmail.com`, and update the app repo's `docs/site/` and in-app contact to match.
+
+## App footage
+
+- Real screens come from `~/Developer/healm-content/stills/` and `clips/` (the marketing Footage agent).
+  Today (light and dark) exists. The scan, Ask, Live Activity, food quick add, Calm breath and privacy screens
+  are being recorded there. Until each appears, its chapter uses a clean placeholder drawn from tokens; check
+  that folder at the start of each session and swap in what has landed (AVIF/WebP with fallbacks).
 
 ## Words
 

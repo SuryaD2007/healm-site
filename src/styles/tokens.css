@@ -60,7 +60,8 @@
   --space-3xl: 64px;
   --space-4xl: 96px;
   --space-5xl: 144px;
-  --gutter: 16px;                /* 375 px phones; grows at larger widths in global.css */
+  --gutter: 16px;                /* 375 px phones; 24 from 640, 40 from 1024 (below) */
+  --content-max: 1200px;
 
   /* Fixed sizes. HealmSpace.swift, HealmSize. */
   --size-tap: 44px;              /* HealmSize.tapTarget */
@@ -126,6 +127,11 @@
   /* web: grain over dark sections. Low enough that type stays crisp. */
   --grain-opacity: 0.05;
 }
+
+/* web: the page gutter grows with the screen. Unlayered like the rest of this file, so nothing in a
+   Tailwind layer can override it by accident. */
+@media (min-width: 640px) { :root { --gutter: 24px; } }
+@media (min-width: 1024px) { :root { --gutter: 40px; } }
 
 /* ------------------------------------------------------------------------------------------------
  * Colors. HealmColors.xcassets: each color has a light ("any") and a dark value.

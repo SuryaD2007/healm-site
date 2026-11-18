@@ -55,24 +55,16 @@ hash here.
 |---|---|---|---|
 | Instrument Serif (Regular, Italic) | The app, `Healm/Resources/Fonts`, originally Google Fonts | SIL Open Font License 1.1 (`public/fonts/OFL.txt`) | `public/fonts/`, subset to Latin as WOFF2 with fonttools |
 | App icon glyph | The app, `Healm/Resources/Icon` | Healm's own | `public/brand/`, `src/components/HealmMark.astro` |
+| Scan sounds (scan.tick, scan.complete) | The app, `Healm/Resources/Sounds`, converted from IMA4 CAF to 16-bit WAV with `afconvert` (AAC would add about 50 ms of padding to a 60 ms tick) | Healm's own | `public/sounds/` |
+| The 3D head | Written here (`src/three/head.ts`): a generic bust built from simple shapes. No scan, photo or likeness of anyone | Healm's own | `src/three/`, `src/assets/hero/` |
 | "Download on the App Store" badge | Apple, `developer.apple.com/assets/elements/badges/download-on-the-app-store.svg` | Apple's marketing guidelines: unmodified, at least 40 px tall, clear space of a quarter of its height | `public/badges/app-store-black.svg` |
 
-### Component libraries: not used yet, pending a decision
+### Components
 
-The brief names both as MIT. Neither is plain MIT:
-
-- **React Bits** ([DavidHDev/react-bits](https://github.com/DavidHDev/react-bits)): **MIT + Commons Clause**.
-  Free to use inside an application or website, including a commercial one. The components themselves may
-  not be sold, sublicensed or redistributed on their own.
-- **Aceternity UI** ([ui.aceternity.com/licence](https://ui.aceternity.com/licence)): the **Aceternity
-  License**. Allows unlimited end products such as websites. Prohibits "re-distribut[ing] the Item as a
-  stock image or its source files, regardless of modifications".
-
-This repository is public, because GitHub Pages serves it for free. A public repo containing their source
-could be read as redistributing it. Until the owner decides, nothing is copied from either. Each piece the
-site needs so far (the ring, the breath square, the dial, the buttons) is written from the app's own code.
-If a piece is borrowed later, it gets a row here with the file, the original component, the commit and the
-license, and the license notice goes in the file.
+Every component is written for this site from the app's own code (Healm/Core/Design and the feature views
+it names). No third-party component library is used, and none is copied from. If that ever changes, the
+borrowed file gets a row in the table above with its source, commit and license, and the license notice
+goes in the file.
 
 ## npm packages
 

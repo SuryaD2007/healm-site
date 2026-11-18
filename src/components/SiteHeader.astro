@@ -1,0 +1,86 @@
+---
+import HealmMark from '@/components/HealmMark.astro';
+import { url } from '@/lib/url';
+import { appStoreUrl } from '@/lib/site';
+
+interface Props {
+  /** Over the hero: transparent, on the hero's dark ground. */
+  overlay?: boolean;
+}
+const { overlay = false } = Astro.props;
+---
+<header class:list={['site-header', { 'is-overlay': overlay }]}>
+  <div class="wrap site-header-row">
+    <a class="site-brand" href={url()} aria-label="Healm, home">
+      <HealmMark size={20} />
+      <span class="site-brand-word" aria-hidden="true">Healm</span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href={`${url()}#scan`}>How it works</a>
+      <a href={url('privacy.html')}>Privacy</a>
+      <a href={url('support.html')}>Support</a>
+    </nav>
+    <div class="site-actions">
+      <button type="button" class="btn-icon is-bordered sound-toggle" data-sound-toggle aria-pressed="false" aria-label="Sound">
+        <svg class="sound-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 9.5h3l4.5-4v13l-4.5-4H4z" /><path d="M16 9.5l5 5M21 9.5l-5 5" />
+        </svg>
+        <svg class="sound-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 9.5h3l4.5-4v13l-4.5-4H4z" /><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+        </svg>
+      </button>
+      {appStoreUrl ? (
+        <a class="btn btn-secondary site-cta" href={appStoreUrl}>Get the app</a>
+      ) : (
+        <a class="btn btn-secondary site-cta" href={`${url()}#download`}>Join the waitlist</a>
+      )}
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header { position: relative; z-index: 10; }
+  .site-header.is-overlay { position: absolute; inset: 0 0 auto 0; }
+  /* Over the hero, line up with its wider column (Hero.astro). */
+  @media (min-width: 1100px) {
+    .site-header.is-overlay .site-header-row { max-width: calc(1600px + 2 * var(--gutter)); }
+  }
+  .site-header-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    min-height: 72px;
+    padding-top: env(safe-area-inset-top);
+  }
+  .site-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: var(--size-tap);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .site-brand-word { font-family: var(--font-serif); font-size: 24px; line-height: 1; }
+  .site-nav { display: none; gap: var(--space-xs); margin-left: var(--space-lg); }
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--size-tap);
+    padding: 0 var(--space-sm);
+    color: var(--ink2);
+    font-size: var(--type-secondary);
+    text-decoration: none;
+    transition: color var(--dur-fade) var(--ease-reveal);
+  }
+  .site-nav a:hover { color: var(--ink); }
+  .site-actions { display: flex; align-items: center; gap: var(--space-sm); margin-left: auto; }
+  .site-cta { display: none; padding: var(--space-xs) var(--space-md); font-size: var(--type-secondary); }
+  .sound-toggle .sound-on { display: none; }
+  .sound-toggle[aria-pressed="true"] .sound-on { display: block; }
+  .sound-toggle[aria-pressed="true"] .sound-off { display: none; }
+  .sound-toggle[aria-pressed="true"] { border-color: var(--ink2); }
+  @media (min-width: 900px) {
+    .site-nav { display: flex; }
+    .site-cta { display: inline-flex; }
+  }
+</style>

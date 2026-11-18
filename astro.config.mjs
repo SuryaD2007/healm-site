@@ -16,7 +16,10 @@ export default defineConfig({
   build: { format: 'file', inlineStylesheets: 'auto' },
   trailingSlash: 'ignore',
   integrations: [
-    react(),
+    // src/three is mounted by hand from src/scripts/hero.ts, not as an Astro island, so Fast Refresh has no
+    // preamble there. Vite compiles its JSX itself (tsconfig: react-jsx). No component on the site is a
+    // React island today; add an island's folder to `include` if one appears.
+    react({ exclude: ['**/src/three/**'] }),
     sitemap({ filter: (page) => !page.includes('styleguide') }),
   ],
   vite: { plugins: [tailwindcss()] },

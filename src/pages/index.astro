@@ -1,11 +1,29 @@
 ---
-// Placeholder until the hero is built (step 3). The live site is still the old pages on main.
 import Base from '@/layouts/Base.astro';
-import { url } from '@/lib/url';
+import SiteHeader from '@/components/SiteHeader.astro';
+import Hero from '@/components/Hero.astro';
 ---
-<Base title="Healm" description="Healm reads your health from your iPhone and coaches you through your day." noindex>
-  <main id="main" class="wrap py-4xl">
-    <h1 class="m-0 font-serif text-section">Healm site v2 is being built.</h1>
-    <p class="mt-md text-ink2">The style preview is ready: <a href={url('styleguide.html')}>open it</a>.</p>
+<!-- noindex until the page is complete (step 5 adds the SEO and the sitemap entry). -->
+<Base
+  title="Healm: your body’s been talking"
+  description="Healm is an iPhone app that scans your skin, hair and body, reads your Apple Health each morning, and explains your day in one plain line."
+  noindex
+>
+  <SiteHeader overlay />
+  <main id="main">
+    <Hero />
+
+    <!-- Placeholders for the scroll chapters (step 4) and the waitlist (step 5), so the hero's links land. -->
+    <section id="scan" class="theme-dark border-t border-hairline">
+      <div class="wrap py-4xl">
+        <p class="m-0 text-caption text-ink2">Work in progress</p>
+        <h2 class="m-0 mt-sm font-serif text-section">The scan chapters come next.</h2>
+      </div>
+    </section>
+    <section id="download" class="theme-dark border-t border-hairline">
+      <div class="wrap py-4xl">
+        <h2 class="m-0 font-serif text-section">The waitlist goes here.</h2>
+      </div>
+    </section>
   </main>
 </Base>

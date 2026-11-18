@@ -11,7 +11,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "poster": "node scripts/render-poster.mjs"
   },
   "dependencies": {
     "@astrojs/react": "7.1.2",
