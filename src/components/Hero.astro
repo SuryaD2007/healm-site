@@ -33,8 +33,8 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
 <section class="hero theme-dark grain" data-hero aria-labelledby="hero-title">
   <div class="wrap hero-grid">
     <h1 id="hero-title" class="hero-title">
-      <span class="hero-l">Your body’s been talking.</span>
-      <span class="hero-r">Healm reads&nbsp;it.</span>
+      <span class="hero-l">Turn your head.</span>
+      <span class="hero-r">Healm reads the&nbsp;rest.</span>
     </h1>
 
     <div
@@ -316,20 +316,20 @@ const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
       display: grid;
       grid-template-columns: 1fr var(--stage) 1fr;
       align-items: end;
-      /* "been talking." is 4.41 em wide: size the type to the room beside the ring, so each half
+      /* The longest line, "Healm reads", is 4.21 em wide: size the type to the room beside the ring, so each half
          keeps two lines at any width. */
-      font-size: clamp(46px, calc(((100cqi - var(--stage)) / 2 - var(--side-gap)) / 4.8), 88px);
+      font-size: clamp(46px, calc(((100cqi - var(--stage)) / 2 - var(--side-gap)) / 4.6), 88px);
       text-align: left;
     }
-    /* Each half breaks the same way at every width: "Your body’s / been talking." and "Healm / reads it." */
+    /* Each half breaks the same way at every width: "Turn your / head." and "Healm reads / the rest." */
     .hero-l {
       grid-column: 1;
       justify-self: end;
-      max-width: calc(4.7em + var(--side-gap));
+      max-width: calc(3.6em + var(--side-gap));
       text-align: right;
       padding-right: var(--side-gap);
     }
-    .hero-r { grid-column: 3; max-width: calc(4.4em + var(--side-gap)); padding-left: var(--side-gap); }
+    .hero-r { grid-column: 3; max-width: calc(4.45em + var(--side-gap)); padding-left: var(--side-gap); }
     .hero-aside {
       grid-row: 3;
       grid-column: 3;

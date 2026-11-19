@@ -38,6 +38,8 @@ export interface SceneHandle {
   setRegion(region: number, amount: number): void;
   /** Hold the head still on its current frame (the pause button, WCAG 2.2.2), or let it move again. */
   setPaused(paused: boolean): void;
+  /** The Body view, 0 to 1: the camera pulls back and the shoulders come up out of the fade. */
+  setBody(amount: number): void;
   destroy(): void;
 }
 
@@ -72,6 +74,8 @@ function createBus(poster: boolean) {
     pulseAt: -100,
     /** Radians, from the scan's heading. */
     look: { yaw: 0, pitch: 0 },
+    /** The Body view, 0 to 1. */
+    body: 0,
   };
 }
 type Bus = ReturnType<typeof createBus>;
@@ -122,6 +126,7 @@ const vertexShader = /* glsl */ `
   uniform float uPulse;
   uniform float uScanned;
   uniform float uGain;
+  uniform float uBody;
   uniform vec3 uInk;
   uniform vec3 uCool;
   uniform vec3 uMint;
@@ -156,7 +161,8 @@ const vertexShader = /* glsl */ `
     glow = max(glow, uPulse * (0.35 + 0.65 * front));
 
     // The shoulders fade out below the ring.
-    float fade = smoothstep(-2.0, -1.2, position.y);
+    // In the Body view the fade drops lower, so the shoulders come up out of it.
+    float fade = smoothstep(mix(-2.0, -2.6, uBody), mix(-1.2, -1.9, uBody), position.y);
 
     // Lit points in ink, shadowed ones cooler (the app's action blue): depth without a gradient.
     vec3 base = mix(uCool, uInk, clamp(0.2 + 0.9 * lambert, 0.0, 1.0));
@@ -232,6 +238,7 @@ function Head({ data, bus, onFirstFrame }: { data: HeadPoints; bus: Bus; onFirst
           uScanned: { value: SCANNED_TINT },
           uOpacity: { value: 1 },
           uGain: { value: 1 },
+          uBody: { value: 0 },
           // The app's ink, action and scanTickFilled (src/styles/tokens.css).
           uInk: { value: color('#ECF2EF') },
           uCool: { value: color('#7FB6D1') },
@@ -255,8 +262,15 @@ function Head({ data, bus, onFirstFrame }: { data: HeadPoints; bus: Bus; onFirst
     material.dispose();
   }, [geometry, material]);
 
-  useFrame(() => {
+  useFrame(({ camera }) => {
     const t = bus.now();
+    // The Body view: the camera pulls back and down a little, so the bust fits inside the ring.
+    const b = bus.poster ? 0 : bus.body;
+    material.uniforms.uBody.value = b;
+    if (Math.abs(camera.position.z - (6.4 + 2.4 * b)) > 1e-4) {
+      camera.position.set(0, 1.4 + 0.2 * b, 6.4 + 2.4 * b);
+      camera.lookAt(0, -0.14 - 0.62 * b, 0);
+    }
     material.uniforms.uTime.value = t;
     const sincePulse = t - bus.pulseAt;
     material.uniforms.uPulse.value = sincePulse >= 0 ? 0.55 * Math.exp(-sincePulse * 2.4) : 0;
@@ -343,6 +357,9 @@ export function mountHeadScene(opts: SceneOptions): SceneHandle {
     },
     setRegion(region, amount) {
       bus.regions[region] = amount;
+    },
+    setBody(amount) {
+      bus.body = Math.min(Math.max(amount, 0), 1);
     },
     setPaused(paused) {
       bus.hold(paused);

@@ -261,6 +261,12 @@
   }
 }
 
+/* Lenis (node_modules/lenis/dist/lenis.css), inlined: src/scripts/smooth.ts. */
+html.lenis, html.lenis body { height: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
 @utility sr-only-focusable {
   &:not(:focus):not(:focus-within) {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;

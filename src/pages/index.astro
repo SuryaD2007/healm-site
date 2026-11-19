@@ -2,26 +2,27 @@
 import Base from '@/layouts/Base.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
 import Hero from '@/components/Hero.astro';
+import ScanChapter from '@/components/chapters/ScanChapter.astro';
+import AskChapter from '@/components/chapters/AskChapter.astro';
 import WaitlistForm from '@/components/WaitlistForm.astro';
 ---
 <!-- noindex until the page is complete (step 5 adds the SEO and the sitemap entry). -->
 <Base
-  title="Healm: your body’s been talking"
+  title="Healm: turn your head, Healm reads the rest"
   description="Healm is an iPhone app that scans your skin, hair and body, reads your Apple Health each morning, and explains your day in one plain line."
   noindex
 >
   <SiteHeader overlay />
   <main id="main">
-    <Hero />
+    <!-- The hero and chapter 1 share one pinned stage: the hero's ring becomes the Scan chapter. -->
+    <div class="scan-sequence" data-scan-sequence>
+      <Hero />
+      <ScanChapter />
+    </div>
 
-    <!-- Placeholders for the scroll chapters (step 4) and the waitlist (step 5), so the hero's links land. -->
-    <section id="scan" class="theme-dark border-t border-hairline">
-      <div class="wrap py-4xl">
-        <p class="m-0 text-caption text-ink2">Work in progress</p>
-        <h2 class="m-0 mt-sm font-serif text-section">The scan chapters come next.</h2>
-      </div>
-    </section>
-    <!-- Chapter 7 (step 4) wraps this in the last ring; the form itself is final. -->
+    <AskChapter />
+
+    <!-- Chapters 3 to 7 come next (step 4). Chapter 7 wraps this in the last ring; the form itself is final. -->
     <section id="download" class="theme-dark border-t border-hairline" aria-labelledby="download-title">
       <div class="wrap grid gap-2xl py-4xl md:grid-cols-2 md:items-end">
         <div>

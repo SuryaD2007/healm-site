@@ -1,0 +1,197 @@
+---
+/**
+ * Chapter 1, Scan. As plain markup it is an ordinary section: the copy, the three scans, and the app's real
+ * face scan screen in a phone (what Reduce Motion and no-script visitors see, with fades only). With the
+ * scroll sequence on (src/scripts/chapters/scan.ts), it lies over the pinned hero instead: the ring sweeps
+ * round the head, the head lights up by region with a label for each, then a phone closes round the stage
+ * and hands over to the real screen.
+ *
+ * The three lines are the app's own (Healm/Features/Scan/ScanMode.swift, `line`), shortened.
+ */
+import { getImage } from 'astro:assets';
+import PhoneFrame from '@/components/PhoneFrame.astro';
+import screen from '@/assets/chapters/scan-screen.png';
+
+const widths = [300, 450, 600, 900];
+const set = async (format: 'avif' | 'webp') =>
+  (await Promise.all(widths.map((width) => getImage({ src: screen, width, format, quality: 70 }))))
+    .map((o, i) => `${o.src} ${widths[i]}w`)
+    .join(', ');
+const avif = await set('avif');
+const webp = await set('webp');
+const fallback = await getImage({ src: screen, width: 600, format: 'png' });
+
+const scans = [
+  { region: 'skin', name: 'Skin', line: 'A guided scan, area by area, with a routine that fits.' },
+  { region: 'hair', name: 'Hair', line: 'Your hairline, temples and the top of your head.' },
+  { region: 'body', name: 'Body', line: 'Measurements and posture.' },
+];
+---
+<section id="scan" class="scan-chapter theme-dark" aria-labelledby="scan-title" data-scan-chapter>
+  <div class="wrap sc-grid">
+    <div class="sc-copy" data-sc-copy>
+      <h2 id="scan-title" class="sc-title">Three scans, read in plain words.</h2>
+      <p class="sc-lede">
+        Turn your head for skin. Take three photos for hair. Step back for body. Healm reads each one and tells
+        you what it sees.
+      </p>
+    </div>
+
+    <ul class="sc-labels" data-sc-labels>
+      {scans.map((s) => (
+        <li class="sc-label" data-region={s.region}>
+          <span class="sc-dot" aria-hidden="true"></span>
+          <span class="sc-name">{s.name}</span>
+          <span class="sc-line">{s.line}</span>
+        </li>
+      ))}
+    </ul>
+
+    <div class="sc-device" data-sc-device>
+      <PhoneFrame class="sc-phone" label="Healm’s face scan in the app: the scan ring around the camera, with the prompt “Move your head slowly in a circle.”">
+        <picture>
+          <source type="image/avif" srcset={avif} sizes="(max-width: 767px) 70vw, 320px" />
+          <source type="image/webp" srcset={webp} sizes="(max-width: 767px) 70vw, 320px" />
+          <img src={fallback.src} width="1080" height="2346" alt="" loading="lazy" decoding="async" />
+        </picture>
+      </PhoneFrame>
+      <p class="sc-caption" data-sc-caption>The face scan, as it looks in the app.</p>
+    </div>
+  </div>
+
+  <!-- The sequence's leader lines from each region to its label, and the sweep, drawn by the script. -->
+  <svg class="sc-leaders" data-sc-leaders aria-hidden="true" focusable="false"></svg>
+</section>
+
+<style is:global>
+  /* ---- Plain layout: Reduce Motion, no script, and the moment before the sequence is ready. ---- */
+  .scan-chapter { position: relative; padding-block: var(--space-4xl); }
+  .sc-grid { display: grid; gap: var(--space-2xl); align-items: center; }
+  .sc-title { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: var(--type-section); line-height: var(--type-section-leading); letter-spacing: var(--tracking-display); max-width: 12ch; }
+  .sc-lede { margin: var(--space-md) 0 0; max-width: 30rem; color: var(--ink2); font-size: var(--type-lede); }
+  .sc-labels { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-lg); }
+  .sc-label { display: grid; grid-template-columns: auto 1fr; column-gap: var(--space-sm); align-items: baseline; }
+  .sc-dot { width: var(--size-dot); height: var(--size-dot); border-radius: 50%; background: var(--scan-tick-filled); transform: translateY(-1px); }
+  .sc-name { font-family: var(--font-serif); font-size: var(--type-card-title); line-height: 1.2; }
+  .sc-line { grid-column: 2; color: var(--ink2); font-size: var(--type-secondary); max-width: 22rem; }
+  .sc-device { display: grid; justify-items: center; gap: var(--space-md); }
+  .sc-phone { --phone-w: min(70vw, 300px); }
+  .sc-caption { margin: 0; color: var(--ink2); font-size: var(--type-caption); }
+  .sc-leaders { display: none; }
+  @media (min-width: 900px) {
+    .sc-grid { grid-template-columns: 1fr auto; grid-template-areas: "copy device" "labels device"; column-gap: var(--space-4xl); }
+    .sc-copy { grid-area: copy; align-self: end; }
+    .sc-labels { grid-area: labels; align-self: start; }
+    .sc-device { grid-area: device; }
+    .sc-phone { --phone-w: 320px; }
+  }
+  /* Reduce Motion and the plain layout: each part fades in once it is on screen. */
+  .sc-fade { opacity: 0; transition: opacity 700ms var(--ease-reveal); }
+  .sc-fade.is-in { opacity: 1; }
+
+  /* ---- The sequence: the chapter lies over the pinned hero (src/scripts/chapters/scan.ts). ---- */
+  html.seq-on .scan-sequence { position: relative; }
+  html.seq-on .scan-chapter {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    background: transparent;
+    pointer-events: none;
+    z-index: 3;
+  }
+  html.seq-on .sc-grid { display: block; max-width: none; padding: 0; height: 100%; }
+  html.seq-on .sc-copy,
+  html.seq-on .sc-label,
+  html.seq-on .sc-device,
+  html.seq-on .sc-leaders { opacity: 0; }
+  html.seq-on .sc-copy {
+    position: absolute;
+    left: var(--copy-x, var(--gutter));
+    top: var(--copy-y, 50%);
+    width: var(--copy-w, 26rem);
+    transform: translateY(-50%);
+  }
+  html.seq-on .sc-labels { position: absolute; inset: 0; display: block; }
+  html.seq-on .sc-label {
+    position: absolute;
+    left: var(--lx);
+    top: var(--ly);
+    width: 15rem;
+    transform: translateY(-50%);
+  }
+  html.seq-on .sc-device {
+    position: absolute;
+    left: var(--phone-x);
+    top: var(--phone-y);
+    display: block;
+  }
+  html.seq-on .sc-phone { --phone-w: var(--phone-size, 300px); }
+  html.seq-on .sc-caption { display: none; }
+  html.seq-on .sc-title { max-width: none; font-size: clamp(34px, 3.3vw, 52px); }
+  html.seq-on .sc-leaders { display: block; position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .sc-leaders line { stroke: var(--ink2); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .sc-leaders circle { fill: var(--scan-tick-filled); }
+
+  /* Phones: the copy goes under the ring; the three scans sit in a row under it and light in turn. */
+  @media (max-width: 767px) {
+    html.seq-on .sc-copy { text-align: center; transform: none; }
+    html.seq-on .sc-title { max-width: none; font-size: clamp(30px, 8.4vw, 40px); }
+    html.seq-on .sc-lede { font-size: var(--type-secondary); margin-top: var(--space-sm); }
+    html.seq-on .sc-labels {
+      inset: auto var(--gutter) auto var(--gutter);
+      top: var(--row-y);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-sm);
+    }
+    html.seq-on .sc-label {
+      position: static;
+      width: auto;
+      transform: none;
+      grid-template-columns: auto 1fr;
+    }
+    html.seq-on .sc-line { display: none; }
+    html.seq-on .sc-name { font-size: var(--type-body); }
+  }
+</style>
+
+<script>
+  // The sequence needs the scroll libraries; the plain layout needs only fades. Decide at once, so the
+  // overlay is in place from the first frame, then load the heavy part after first paint.
+  import { prefersReducedMotion } from '@/lib/motion';
+
+  const chapter = document.querySelector<HTMLElement>('[data-scan-chapter]');
+  const plain = () => {
+    document.documentElement.classList.remove('seq-on');
+    const parts = chapter?.querySelectorAll<HTMLElement>('[data-sc-copy], .sc-label, [data-sc-device]') ?? [];
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.25 });
+    parts.forEach((p) => {
+      p.classList.add('sc-fade');
+      io.observe(p);
+    });
+  };
+
+  if (chapter) {
+    if (prefersReducedMotion() || new URLSearchParams(location.search).has('poster')) {
+      plain();
+    } else {
+      document.documentElement.classList.add('seq-on');
+      const start = () =>
+        import('@/scripts/chapters/scan')
+          .then((m) => m.setupScanSequence())
+          .catch((error) => {
+            if (import.meta.env.DEV) console.warn('[scan] sequence did not load', error);
+            plain();
+          });
+      if (document.readyState === 'complete') requestAnimationFrame(start);
+      else window.addEventListener('load', () => requestAnimationFrame(start), { once: true });
+    }
+  }
+</script>

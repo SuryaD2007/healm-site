@@ -245,9 +245,12 @@ export class HealmScanRing extends HTMLElement {
     return (on && time - v.at < this.fill.duration) || v.glowAt >= 0;
   }
 
-  /** ScanTickPacer.add: ticks someone filled, in the order they filled them. */
-  queue(ticks: number[]) {
-    if (this.complete || !this.loop) return;
+  /**
+   * ScanTickPacer.add: ticks someone filled, in the order they filled them. A finished scan takes no more,
+   * as in the app, unless `evenIfComplete` (the Scan chapter's sweep, which fills the whole ring).
+   */
+  queue(ticks: number[], evenIfComplete = false) {
+    if ((this.complete && !evenIfComplete) || !this.loop) return;
     let added = false;
     for (const t of ticks) {
       if (t >= 0 && t < this.count && !this.filled[t] && !this.pending.includes(t)) {

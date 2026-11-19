@@ -6,7 +6,8 @@
  *   - pointer: the cursor's direction from the middle of the ring, up to 24 degrees at the ring's edge;
  *   - keys:    the arrow keys while the stage has focus, 22 degrees each way;
  *   - auto:    the head turns once around by itself (phones, and the Auto scan button);
- *   - demo:    after 8 seconds without a mouse move, the head turns through a third of the ring, once.
+ *   - demo:    after 8 seconds without a mouse move, the head turns through a third of the ring, once;
+ *   - scroll:  the Scan chapter steers the head as the page scrolls (src/scripts/chapters/scan.ts).
  * Every frame, the app's fill rule (src/lib/scan.ts) turns the heading into ticks for the ring, which
  * paces them at 15 a second and completes at 85%. The head (if the 3D scene is running) turns to the same
  * heading, and its scan lines light where the ring fills.
@@ -17,7 +18,7 @@ import type { HealmScanRing } from '@/scripts/scan-ring';
 import type { SceneHandle } from '@/three/HeadScene';
 import { sound } from '@/scripts/sound';
 
-type Mode = 'idle' | 'pointer' | 'keys' | 'auto' | 'demo' | 'done';
+type Mode = 'idle' | 'pointer' | 'keys' | 'auto' | 'demo' | 'done' | 'scroll';
 
 /** How far the head turns with the cursor at the ring's edge, and with an arrow key held. */
 const POINTER_TURN = 24;
@@ -60,6 +61,7 @@ export class HeroScan {
   private demoTimer = 0;
   private announced = 0;
   private onScreen = false;
+  private scrollTarget: Heading = { right: 0, up: 0 };
 
   constructor(els: HeroScanElements, opts: { mouse: boolean; reduced: boolean }) {
     this.els = els;
@@ -114,6 +116,22 @@ export class HeroScan {
     this.setStatus('');
   }
 
+  /**
+   * The Scan chapter takes the head while it scrolls: a heading to turn to, or null to hand it back.
+   * The cursor and keys wait while it does, and nothing fills from the heading (the chapter's sweep does).
+   */
+  steer(heading: Heading | null) {
+    if (heading) {
+      clearTimeout(this.demoTimer);
+      this.demoPlayed = true;
+      this.scrollTarget = heading;
+      if (this.mode !== 'scroll') this.setMode('scroll');
+      else this.loop.start();
+    } else if (this.mode === 'scroll') {
+      this.setMode(this.els.ring.complete ? 'done' : 'idle');
+    }
+  }
+
   private setMode(mode: Mode) {
     this.mode = mode;
     this.modeAt = this.loop.time;
@@ -124,7 +142,7 @@ export class HeroScan {
     if (e.pointerType !== 'mouse' || !this.onScreen) return;
     this.interacted = true;
     clearTimeout(this.demoTimer);
-    if (this.mode === 'done' || this.mode === 'auto') return;
+    if (this.mode === 'done' || this.mode === 'auto' || this.mode === 'scroll') return;
     const r = this.els.stage.getBoundingClientRect();
     const radius = r.width * RING_RADIUS;
     let x = (e.clientX - (r.left + r.width / 2)) / radius;
@@ -142,7 +160,7 @@ export class HeroScan {
   private onKey(e: KeyboardEvent, down: boolean) {
     if (!e.key.startsWith('Arrow')) return;
     e.preventDefault();
-    if (this.mode === 'done' || this.mode === 'auto') return;
+    if (this.mode === 'done' || this.mode === 'auto' || this.mode === 'scroll') return;
     if (down) this.keys.add(e.key);
     else this.keys.delete(e.key);
     this.interacted = true;
@@ -170,6 +188,9 @@ export class HeroScan {
         break;
       case 'keys':
         break; // set by the keys
+      case 'scroll':
+        this.target = this.scrollTarget;
+        break;
       case 'auto': {
         const h = autoHeading(since);
         this.target = h ?? { right: 0, up: 0 };
@@ -192,7 +213,7 @@ export class HeroScan {
 
     const h = this.spring.step(this.target, dt);
     this.scene?.look(h.right, h.up);
-    if (this.mode !== 'idle' && this.mode !== 'done') this.els.ring.queue(ticksFor(h));
+    if (this.mode !== 'idle' && this.mode !== 'done' && this.mode !== 'scroll') this.els.ring.queue(ticksFor(h));
 
     // Keep going while something drives the head or it is still moving; a resting cursor or released
     // keys let the loop sleep until the next input wakes it.
@@ -215,7 +236,7 @@ export class HeroScan {
   }
 
   private onComplete() {
-    this.mode = 'done';
+    if (this.mode !== 'scroll') this.mode = 'done';
     this.loop.start(); // the head settles forward
     this.scene?.pulse();
     sound.complete();

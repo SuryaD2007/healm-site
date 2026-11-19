@@ -20,6 +20,7 @@ import type { HealmScanRing } from '@/scripts/scan-ring';
 import type { HeadPoints } from '@/three/head';
 import type { SceneHandle } from '@/three/HeadScene';
 import { HeroScan } from '@/scripts/hero-scan';
+import { heroState } from '@/scripts/hero-state';
 
 const DESKTOP_POINTS = 22000;
 const PHONE_POINTS = 10000;
@@ -95,6 +96,8 @@ if (hero) {
         },
         { mouse, reduced },
       );
+  heroState.scan = scan;
+  heroState.ring = ring;
 
   // The head moves for as long as the page is open, so it gets a pause (WCAG 2.2.2). The label says what
   // the button will do.
@@ -118,6 +121,7 @@ if (hero) {
             stage.classList.add('is-live');
             if (pause && !poster) pause.hidden = false;
             if (scan) scan.scene = scene;
+            heroState.scene = scene;
             resolve();
           },
           onSlow: () => {
@@ -125,6 +129,7 @@ if (hero) {
             stage.classList.remove('is-live');
             if (pause) pause.hidden = true;
             if (scan) scan.scene = null;
+            heroState.scene = null;
             setTimeout(() => {
               scene?.destroy();
               scene = null;
