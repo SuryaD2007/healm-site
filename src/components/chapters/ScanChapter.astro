@@ -7,10 +7,17 @@
  * and hands over to the real screen.
  *
  * The three lines are the app's own (Healm/Features/Scan/ScanMode.swift, `line`), shortened.
+ *
+ * In the phone: a still of the scan (Reduce Motion, no script), or, with motion, a 12.6 second loop of
+ * the real face scan from the Footage agent's clip (3.4 s to 16.0 s of clips/face-scan-dark.mp4: position,
+ * hold still, turn, the ring completes, "Reading your skin"; it stops before the result). H.264, 720 px,
+ * 150 KB, no sound, loaded only as the phone comes in. It has a pause button (WCAG 2.2.2).
  */
 import { getImage } from 'astro:assets';
 import PhoneFrame from '@/components/PhoneFrame.astro';
 import screen from '@/assets/chapters/scan-screen.png';
+import loopFirst from '@/assets/chapters/scan-loop-first.png';
+import { url } from '@/lib/url';
 
 const widths = [300, 450, 600, 900];
 const set = async (format: 'avif' | 'webp') =>
@@ -20,6 +27,8 @@ const set = async (format: 'avif' | 'webp') =>
 const avif = await set('avif');
 const webp = await set('webp');
 const fallback = await getImage({ src: screen, width: 600, format: 'png' });
+// The loop's first frame, so nothing jumps when it starts playing.
+const poster = await getImage({ src: loopFirst, width: 720, format: 'webp', quality: 75 });
 
 const scans = [
   { region: 'skin', name: 'Skin', line: 'A guided scan, area by area, with a routine that fits.' },
@@ -54,7 +63,15 @@ const scans = [
           <source type="image/webp" srcset={webp} sizes="(max-width: 767px) 70vw, 320px" />
           <img src={fallback.src} width="1080" height="2346" alt="" loading="lazy" decoding="async" />
         </picture>
+        <video class="sc-video" data-sc-video muted playsinline loop preload="none" poster={poster.src} aria-hidden="true" hidden>
+          <source src={url('media/face-scan.mp4')} type="video/mp4" />
+        </video>
       </PhoneFrame>
+      <button type="button" class="btn-icon is-bordered sc-video-toggle" data-sc-video-toggle hidden>
+        <svg class="icon-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="3.5" height="14" rx="1" /><rect x="14.5" y="5" width="3.5" height="14" rx="1" /></svg>
+        <svg class="icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
+        <span class="sr-only" data-label>Pause the scan video</span>
+      </button>
       <p class="sc-caption" data-sc-caption>The face scan, as it looks in the app.</p>
     </div>
   </div>
@@ -77,6 +94,26 @@ const scans = [
   .sc-device { display: grid; justify-items: center; gap: var(--space-md); }
   .sc-phone { --phone-w: min(70vw, 300px); }
   .sc-caption { margin: 0; color: var(--ink2); font-size: var(--type-caption); }
+  .sc-device { position: relative; width: fit-content; justify-self: center; }
+  .sc-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .sc-video[hidden] { display: none; }
+  /* The video's pause, by the phone's lower corner. Clickable even over the pinned hero. */
+  .sc-video-toggle {
+    position: absolute;
+    right: calc(-1 * var(--size-tap) - var(--space-sm));
+    bottom: var(--space-md);
+    pointer-events: auto;
+    color: var(--ink2);
+    background: var(--ground);
+  }
+  .sc-video-toggle[hidden] { display: none; }
+  @media (max-width: 899px) {
+    .sc-video-toggle { right: var(--space-md); bottom: var(--space-md); }
+  }
+  .sc-video-toggle:hover { color: var(--ink); }
+  .sc-video-toggle .icon-play { display: none; }
+  .sc-video-toggle.is-paused .icon-play { display: block; }
+  .sc-video-toggle.is-paused .icon-pause { display: none; }
   .sc-leaders { display: none; }
   @media (min-width: 900px) {
     .sc-grid { grid-template-columns: 1fr auto; grid-template-areas: "copy device" "labels device"; column-gap: var(--space-4xl); }
@@ -159,6 +196,7 @@ const scans = [
   // The sequence needs the scroll libraries; the plain layout needs only fades. Decide at once, so the
   // overlay is in place from the first frame, then load the heavy part after first paint.
   import { prefersReducedMotion } from '@/lib/motion';
+  import { setupScanVideo } from '@/scripts/chapters/scan-video';
 
   const chapter = document.querySelector<HTMLElement>('[data-scan-chapter]');
   const plain = () => {
@@ -185,10 +223,14 @@ const scans = [
       document.documentElement.classList.add('seq-on');
       const start = () =>
         import('@/scripts/chapters/scan')
-          .then((m) => m.setupScanSequence())
+          .then((m) => {
+            m.setupScanSequence();
+            setupScanVideo(chapter, { sequenced: true });
+          })
           .catch((error) => {
             if (import.meta.env.DEV) console.warn('[scan] sequence did not load', error);
             plain();
+            setupScanVideo(chapter, { sequenced: false });
           });
       if (document.readyState === 'complete') requestAnimationFrame(start);
       else window.addEventListener('load', () => requestAnimationFrame(start), { once: true });

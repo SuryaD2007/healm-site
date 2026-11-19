@@ -164,6 +164,8 @@ export function setupScanSequence() {
   /** The 3D head, the regions, the Body view, the sweep and the ring, from the timeline's progress. */
   let lastSweep = -1;
   const drive = (p: number) => {
+    // The phone's video (src/scripts/chapters/scan-video.ts) starts once the phone is in.
+    chapter.dispatchEvent(new CustomEvent('scanprogress', { detail: p }));
     const { scan, scene, ring } = heroState;
     if (p < 0.03) scan?.steer(null);
     else {

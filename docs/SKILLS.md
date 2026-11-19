@@ -56,6 +56,7 @@ hash here.
 | Instrument Serif (Regular, Italic) | The app, `Healm/Resources/Fonts`, originally Google Fonts | SIL Open Font License 1.1 (`public/fonts/OFL.txt`) | `public/fonts/`, subset to Latin as WOFF2 with fonttools |
 | App icon glyph | The app, `Healm/Resources/Icon` | Healm's own | `public/brand/`, `src/components/HealmMark.astro` |
 | Scan sounds (scan.tick, scan.complete) | The app, `Healm/Resources/Sounds`, converted from IMA4 CAF to 16-bit WAV with `afconvert` (AAC would add about 50 ms of padding to a 60 ms tick) | Healm's own | `public/sounds/` |
+| Face scan loop and stills | The Footage agent, `~/Developer/healm-content/clips/face-scan-dark.mp4` (3.4 s to 16.0 s) and a clean frame at 7.2 s; Ask screens rebuilt from `stills/ask-conversation-*.png` | Healm's own | `public/media/face-scan.mp4`, `src/assets/chapters/` |
 | The 3D head | Written here (`src/three/head.ts`): a generic bust built from simple shapes. No scan, photo or likeness of anyone | Healm's own | `src/three/`, `src/assets/hero/` |
 | "Download on the App Store" badge | Apple, `developer.apple.com/assets/elements/badges/download-on-the-app-store.svg` | Apple's marketing guidelines: unmodified, at least 40 px tall, clear space of a quarter of its height | `public/badges/app-store-black.svg` |
 

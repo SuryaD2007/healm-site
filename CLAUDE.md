@@ -69,6 +69,12 @@ Swift file it came from. Change the app first, then the tokens.
   are being recorded there. Until each appears, its chapter uses a clean placeholder drawn from tokens; check
   that folder at the start of each session and swap in what has landed (AVIF/WebP with fallbacks).
 
+- Clips are cut and encoded with ffmpeg (installed with Homebrew). Screen recordings compress very well
+  as H.264, so no other codec is needed. The scan loop in chapter 1 is:
+  `ffmpeg -i clips/face-scan-dark.mp4 -ss 3.4 -to 16.0 -an -vf "scale=720:-2:flags=lanczos,fps=30" -c:v libx264 -preset veryslow -tune animation -crf 26 -profile:v high -pix_fmt yuv420p -movflags +faststart public/media/face-scan.mp4`
+  (about 150 KB). Never show a result screen with a severity, a face map or a product pick: those read as
+  medical claims on a marketing page. Any looping video longer than 5 seconds gets a pause button.
+
 ## Words
 
 - Clear, warm, a bit playful, Gen Z friendly but not slangy. Use the copywriting skill.
