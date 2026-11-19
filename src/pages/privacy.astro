@@ -1,0 +1,20 @@
+---
+/**
+ * The privacy policy, at the URL App Review links to (privacy.html). The words are the policy's own,
+ * unchanged, in src/content/legal/privacy.html (taken from the old page; the app repo's docs/site/ is their
+ * source). Change them only with the owner's approval.
+ */
+import Base from '@/layouts/Base.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import policy from '@/content/legal/privacy.html?raw';
+---
+<Base
+  title="Healm Privacy Policy"
+  description="What Healm keeps on your phone, what its server holds, and what passes through its AI model for one answer."
+  theme="auto"
+>
+  <SiteHeader sound={false} />
+  <main id="main" class="legal" set:html={policy} />
+  <SiteFooter />
+</Base>

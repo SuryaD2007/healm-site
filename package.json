@@ -13,7 +13,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "poster": "node scripts/render-poster.mjs",
-    "test": "node --test tests/scan.test.ts"
+    "test": "node --test tests/scan.test.ts",
+    "share-image": "node scripts/render-share-image.mjs"
   },
   "dependencies": {
     "@astrojs/react": "7.1.2",

@@ -1,6 +1,7 @@
 ---
 import Base from '@/layouts/Base.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
 import Hero from '@/components/Hero.astro';
 import ScanChapter from '@/components/chapters/ScanChapter.astro';
 import AskChapter from '@/components/chapters/AskChapter.astro';
@@ -9,13 +10,38 @@ import FoodChapter from '@/components/chapters/FoodChapter.astro';
 import BreathChapter from '@/components/chapters/BreathChapter.astro';
 import PrivacyChapter from '@/components/chapters/PrivacyChapter.astro';
 import DownloadChapter from '@/components/chapters/DownloadChapter.astro';
+import Faq from '@/components/Faq.astro';
+import { faqs } from '@/lib/faqs';
+import { appStoreUrl } from '@/lib/site';
+import { url } from '@/lib/url';
+
+const description =
+  'Healm is an iPhone app that scans your skin, hair and body, reads your Apple Health each morning, and explains your day in one plain line.';
+const home = new URL(url(), Astro.site).href;
+
+// Structured data: the app (no ratings or reviews: Healm has none to show yet), and the questions.
+const structured = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'MobileApplication',
+    name: 'Healm',
+    operatingSystem: 'iOS',
+    applicationCategory: 'HealthApplication',
+    description,
+    url: home,
+    image: new URL(url('apple-touch-icon.png'), Astro.site).href,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    ...(appStoreUrl ? { downloadUrl: appStoreUrl, installUrl: appStoreUrl } : {}),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
 ---
-<!-- noindex until the page is complete (step 5 adds the SEO and the sitemap entry). -->
-<Base
-  title="Healm: turn your head, Healm reads the rest"
-  description="Healm is an iPhone app that scans your skin, hair and body, reads your Apple Health each morning, and explains your day in one plain line."
-  noindex
->
+<Base title="Healm: turn your head, Healm reads the rest" description={description}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(structured)} />
   <SiteHeader overlay />
   <main id="main">
     <!-- The hero and chapter 1 share one pinned stage: the hero's ring becomes the Scan chapter. -->
@@ -29,5 +55,7 @@ import DownloadChapter from '@/components/chapters/DownloadChapter.astro';
     <BreathChapter />
     <PrivacyChapter />
     <DownloadChapter />
+    <Faq />
   </main>
+  <SiteFooter />
 </Base>

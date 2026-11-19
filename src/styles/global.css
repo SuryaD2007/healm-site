@@ -303,6 +303,36 @@
   }
 }
 
+/* Privacy, Terms and Support: one readable column, the old pages' structure on the new tokens. The words
+   come from src/content/legal/*.html unchanged. */
+@layer components {
+  .legal { max-width: calc(44rem + 2 * var(--gutter)); margin-inline: auto; padding: var(--space-3xl) var(--gutter) var(--space-4xl); }
+  .legal h1 { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: clamp(40px, 7vw, 64px); line-height: 1.05; letter-spacing: var(--tracking-display); }
+  .legal h2 { margin: var(--space-2xl) 0 0; padding-top: var(--space-lg); border-top: 1px solid var(--hairline); font-family: var(--font-serif); font-weight: 400; font-size: clamp(26px, 4vw, 32px); line-height: 1.15; }
+  .legal h3 { margin: var(--space-lg) 0 0; font-size: var(--type-body); font-weight: 600; }
+  .legal p, .legal ul, .legal table { margin: var(--space-sm) 0 0; }
+  .legal ul { padding-left: 1.2em; }
+  .legal li + li { margin-top: 6px; }
+  .legal .meta { margin-top: var(--space-xs); color: var(--ink2); font-size: var(--type-secondary); }
+  .legal .lede { margin-top: var(--space-lg); font-size: var(--type-lede); }
+  .legal .callout { margin-top: var(--space-lg); display: block; }
+  .legal .callout::before { display: none; }
+  .legal .callout p:first-child { margin-top: 0; }
+  .legal table { width: 100%; border-collapse: collapse; font-size: var(--type-secondary); }
+  .legal th, .legal td { text-align: left; vertical-align: top; padding: var(--space-xs) var(--space-sm) var(--space-xs) 0; border-bottom: 1px solid var(--hairline); }
+  .legal th { font-weight: 600; }
+  .legal td:first-child { width: 38%; }
+  .legal-note { margin-top: var(--space-2xl); padding-top: var(--space-lg); border-top: 1px solid var(--hairline); color: var(--ink2); font-size: var(--type-caption); }
+  .legal-note p { margin-top: var(--space-xs); }
+  @media (max-width: 480px) {
+    .legal table, .legal thead, .legal tbody, .legal tr, .legal th, .legal td { display: block; width: 100%; }
+    .legal thead { display: none; }
+    .legal td { border-bottom: 0; padding: 2px 0; }
+    .legal td:first-child { width: 100%; font-weight: 600; padding-top: var(--space-sm); }
+    .legal tr { border-bottom: 1px solid var(--hairline); padding-bottom: var(--space-xs); }
+  }
+}
+
 /* Lenis (node_modules/lenis/dist/lenis.css), inlined: src/scripts/smooth.ts. */
 html.lenis, html.lenis body { height: auto; }
 .lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }

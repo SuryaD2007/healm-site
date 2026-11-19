@@ -1,6 +1,7 @@
 ---
 import '@/styles/global.css';
 import { url } from '@/lib/url';
+import { site } from '@/lib/site';
 
 interface Props {
   title: string;
@@ -12,6 +13,10 @@ interface Props {
 
 const { title, description, theme = 'dark', noindex = false } = Astro.props;
 const themeColor = theme === 'light' ? '#FFFFFF' : '#0D1F22';
+
+// Absolute URLs for sharing: this page, and the share image (scripts/render-share-image.mjs).
+const canonical = new URL(Astro.url.pathname.replace(/index\.html$/, ''), Astro.site).href;
+const shareImage = new URL(url('share/healm.png'), Astro.site).href;
 
 // Instrument Serif, the app's display face (Healm/Resources/Fonts; SIL Open Font License, public/fonts/OFL.txt),
 // subset to Latin and punctuation as WOFF2.
@@ -26,7 +31,23 @@ const fontFaces = `
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {noindex ? <meta name="robots" content="noindex, nofollow" /> : <link rel="canonical" href={canonical} />}
+
+    <!-- Sharing: Open Graph and X. The image is 1200 x 630. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Healm" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A head drawn in scan lines inside Healm’s scan ring, beside the words Turn your head. Healm reads the rest." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={site.socials.find((s) => s.name === 'X')?.handle} />
+
+    <!-- Safari's Smart App Banner, once Healm has an App Store ID (src/lib/site.ts). -->
+    {site.appStoreId && <meta name="apple-itunes-app" content={`app-id=${site.appStoreId}`} />}
     {theme === 'auto' ? (
       <>
         <meta name="theme-color" media="(prefers-color-scheme: light)" content="#FFFFFF" />
@@ -36,6 +57,8 @@ const fontFaces = `
       <meta name="theme-color" content={themeColor} />
     )}
     <link rel="icon" href={url('brand/icon-dark.svg')} type="image/svg+xml" />
+    <link rel="icon" href={url('favicon-32.png')} type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href={url('apple-touch-icon.png')} />
     <link rel="preload" href={url('fonts/InstrumentSerif-Regular.woff2')} as="font" type="font/woff2" crossorigin />
     <style is:inline set:html={fontFaces}></style>
     <slot name="head" />

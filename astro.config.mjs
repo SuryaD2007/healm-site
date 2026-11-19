@@ -20,7 +20,12 @@ export default defineConfig({
     // preamble there. Vite compiles its JSX itself (tsconfig: react-jsx). No component on the site is a
     // React island today; add an island's folder to `include` if one appears.
     react({ exclude: ['**/src/three/**'] }),
-    sitemap({ filter: (page) => !page.includes('styleguide') }),
+    // The style preview and the share image's page are tools, not pages.
+    sitemap({
+      filter: (page) => !/styleguide|share-card/.test(page),
+      // The pages are files (privacy.html), the same addresses the canonical links and App Review use.
+      serialize: (item) => ({ ...item, url: item.url.endsWith('/') ? item.url : `${item.url}.html` }),
+    }),
   ],
   vite: { plugins: [tailwindcss()] },
   devToolbar: { enabled: false },

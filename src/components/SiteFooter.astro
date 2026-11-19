@@ -1,0 +1,66 @@
+---
+/**
+ * The footer on every page: the pages, the contact email, the socials, and the line every Healm page
+ * carries (the app's own callout: information, not diagnosis or treatment; 911 in an emergency).
+ */
+import HealmMark from '@/components/HealmMark.astro';
+import { url } from '@/lib/url';
+import { site } from '@/lib/site';
+
+const year = new Date().getFullYear();
+---
+<footer class="site-footer theme-dark" aria-labelledby="footer-title">
+  <h2 id="footer-title" class="sr-only">About Healm</h2>
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <a class="footer-mark" href={url()} aria-label="Healm, home">
+        <HealmMark size={22} />
+        <span class="footer-word" aria-hidden="true">Healm</span>
+      </a>
+      <p class="footer-line">
+        Healm gives health information, not diagnosis or treatment. In an emergency, call 911.
+      </p>
+    </div>
+
+    <nav class="footer-col" aria-label="Pages">
+      <p class="footer-head">Healm</p>
+      <ul>
+        <li><a href={`${url()}#scan`}>How it works</a></li>
+        <li><a href={url('support.html')}>Support</a></li>
+        <li><a href={url('privacy.html')}>Privacy policy</a></li>
+        <li><a href={url('terms.html')}>Terms of use</a></li>
+      </ul>
+    </nav>
+
+    <div class="footer-col">
+      <p class="footer-head">Contact</p>
+      <ul>
+        <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+        {site.socials.map((s) => (
+          <li><a href={s.url} rel="me noopener" target="_blank">{s.name} <span class="footer-handle">{s.handle}</span><span class="sr-only"> (opens in a new tab)</span></a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-base">
+    <p>© {year} Healm</p>
+  </div>
+</footer>
+
+<style is:global>
+  .site-footer { border-top: 1px solid var(--hairline); padding-block: var(--space-3xl) var(--space-xl); }
+  .footer-grid { display: grid; gap: var(--space-2xl); }
+  .footer-mark { display: inline-flex; align-items: center; gap: var(--space-sm); min-height: var(--size-tap); color: var(--ink); text-decoration: none; }
+  .footer-word { font-family: var(--font-serif); font-size: 24px; line-height: 1; }
+  .footer-line { margin: var(--space-sm) 0 0; max-width: 24rem; color: var(--ink2); font-size: var(--type-secondary); }
+  .footer-head { margin: 0 0 var(--space-xs); color: var(--ink2); font-size: var(--type-caption); }
+  .footer-col ul { list-style: none; margin: 0; padding: 0; }
+  .footer-col a { display: inline-flex; align-items: center; gap: var(--space-xs); min-height: var(--size-tap); color: var(--ink); text-decoration: none; font-size: var(--type-secondary); }
+  .footer-col a:hover { text-decoration: underline; }
+  .footer-handle { color: var(--ink2); }
+  .footer-base { margin-top: var(--space-2xl); padding-top: var(--space-md); border-top: 1px solid var(--hairline); color: var(--ink2); font-size: var(--type-caption); }
+  .footer-base p { margin: 0; }
+  @media (min-width: 900px) {
+    .footer-grid { grid-template-columns: 2fr 1fr 1fr; }
+  }
+</style>

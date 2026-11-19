@@ -1,0 +1,47 @@
+---
+/**
+ * The share image's page (Open Graph and X), 1200 x 630: the head in scan lines inside a full scan ring,
+ * the headline, and the mark. Not a page for people: noindex, out of the sitemap. Render it with
+ * `node scripts/render-share-image.mjs` (dev server running) into public/share/healm.png.
+ */
+import { getImage } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import ScanRing from '@/components/ScanRing.astro';
+import HealmMark from '@/components/HealmMark.astro';
+import poster from '@/assets/hero/poster-desktop.png';
+
+const head = await getImage({ src: poster, width: 1000, format: 'png' });
+---
+<Base title="Healm share image" description="The image Healm's pages show when shared." noindex>
+  <main id="main" class="share theme-dark">
+    <div class="share-copy">
+      <p class="share-brand"><HealmMark size={30} /><span>Healm</span></p>
+      <h1 class="share-title">Turn your head.<br />Healm reads the rest.</h1>
+      <p class="share-line">An iPhone app that scans your skin, hair and body, and explains your day in one plain line.</p>
+    </div>
+    <div class="share-stage">
+      <img src={head.src} alt="" width="500" height="500" />
+      <ScanRing class="share-ring" decorative />
+    </div>
+  </main>
+</Base>
+
+<style is:global>
+  html:has(.share), html:has(.share) body { width: 1200px; height: 630px; overflow: hidden; }
+  .share { position: relative; width: 1200px; height: 630px; display: grid; grid-template-columns: 1fr 560px; align-items: center; padding: 0 40px 0 80px; }
+  .share-brand { display: flex; align-items: center; gap: 14px; margin: 0 0 40px; font-family: var(--font-serif); font-size: 34px; line-height: 1; }
+  .share-title { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: 70px; line-height: 1.02; letter-spacing: var(--tracking-display); white-space: nowrap; }
+  .share-line { margin: 28px 0 0; max-width: 26rem; color: var(--ink2); font-size: 21px; line-height: 1.45; }
+  .share-stage { position: relative; width: 560px; height: 560px; }
+  .share-stage > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .share-stage > .share-ring { position: absolute; inset: 0; }
+</style>
+
+<script>
+  import type { HealmScanRing } from '@/scripts/scan-ring';
+  // A full ring, then tell the renderer the card is ready.
+  document.fonts.ready.then(() => {
+    document.querySelector<HealmScanRing>('.share-ring')?.setProgress(1);
+    setTimeout(() => (document.title = 'share-ready'), 1200);
+  });
+</script>

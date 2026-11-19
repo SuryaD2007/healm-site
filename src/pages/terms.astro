@@ -1,0 +1,19 @@
+---
+/**
+ * The terms of use. The words are the terms' own, unchanged, in src/content/legal/terms.html. Change them
+ * only with the owner's approval.
+ */
+import Base from '@/layouts/Base.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import terms from '@/content/legal/terms.html?raw';
+---
+<Base
+  title="Healm Terms of Use"
+  description="The terms for using Healm: what it is and is not, emergencies, your account, and the limits of what Healm promises."
+  theme="auto"
+>
+  <SiteHeader sound={false} />
+  <main id="main" class="legal" set:html={terms} />
+  <SiteFooter />
+</Base>

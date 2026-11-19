@@ -6,8 +6,10 @@ import { appStoreUrl } from '@/lib/site';
 interface Props {
   /** Over the hero: transparent, on the hero's dark ground. */
   overlay?: boolean;
+  /** The sound toggle, only where there is something to hear (the home page). */
+  sound?: boolean;
 }
-const { overlay = false } = Astro.props;
+const { overlay = false, sound = true } = Astro.props;
 ---
 <header class:list={['site-header', { 'is-overlay': overlay }]}>
   <div class="wrap site-header-row">
@@ -21,14 +23,14 @@ const { overlay = false } = Astro.props;
       <a href={url('support.html')}>Support</a>
     </nav>
     <div class="site-actions">
-      <button type="button" class="btn-icon is-bordered sound-toggle" data-sound-toggle aria-pressed="false" aria-label="Sound">
+      {sound && <button type="button" class="btn-icon is-bordered sound-toggle" data-sound-toggle aria-pressed="false" aria-label="Sound">
         <svg class="sound-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M4 9.5h3l4.5-4v13l-4.5-4H4z" /><path d="M16 9.5l5 5M21 9.5l-5 5" />
         </svg>
         <svg class="sound-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M4 9.5h3l4.5-4v13l-4.5-4H4z" /><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
         </svg>
-      </button>
+      </button>}
       {appStoreUrl ? (
         <a class="btn btn-secondary site-cta" href={appStoreUrl}>Get the app</a>
       ) : (
