@@ -4,7 +4,11 @@ import SiteHeader from '@/components/SiteHeader.astro';
 import Hero from '@/components/Hero.astro';
 import ScanChapter from '@/components/chapters/ScanChapter.astro';
 import AskChapter from '@/components/chapters/AskChapter.astro';
-import WaitlistForm from '@/components/WaitlistForm.astro';
+import StepsChapter from '@/components/chapters/StepsChapter.astro';
+import FoodChapter from '@/components/chapters/FoodChapter.astro';
+import BreathChapter from '@/components/chapters/BreathChapter.astro';
+import PrivacyChapter from '@/components/chapters/PrivacyChapter.astro';
+import DownloadChapter from '@/components/chapters/DownloadChapter.astro';
 ---
 <!-- noindex until the page is complete (step 5 adds the SEO and the sitemap entry). -->
 <Base
@@ -19,20 +23,11 @@ import WaitlistForm from '@/components/WaitlistForm.astro';
       <Hero />
       <ScanChapter />
     </div>
-
     <AskChapter />
-
-    <!-- Chapters 3 to 7 come next (step 4). Chapter 7 wraps this in the last ring; the form itself is final. -->
-    <section id="download" class="theme-dark border-t border-hairline" aria-labelledby="download-title">
-      <div class="wrap grid gap-2xl py-4xl md:grid-cols-2 md:items-end">
-        <div>
-          <h2 id="download-title" class="m-0 font-serif text-section">Get Healm first.</h2>
-          <p class="mt-md max-w-[30rem] text-lede text-ink2">
-            Healm is coming to the App Store. Leave your email and you’ll hear the day it lands.
-          </p>
-        </div>
-        <WaitlistForm />
-      </div>
-    </section>
+    <StepsChapter />
+    <FoodChapter />
+    <BreathChapter />
+    <PrivacyChapter />
+    <DownloadChapter />
   </main>
 </Base>

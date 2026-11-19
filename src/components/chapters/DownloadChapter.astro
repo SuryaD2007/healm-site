@@ -1,0 +1,64 @@
+---
+/**
+ * Chapter 7, Download. The scan ring one last time, round the end of the story: it fills as the chapter
+ * scrolls up to the middle of the screen, and pulses once when it closes (src/scripts/chapters/download.ts).
+ * Inside it, the App Store badge once there is an App Store ID (src/lib/site.ts); until then the waitlist.
+ * Under Reduce Motion the ring is a full progress stroke as soon as it is on screen.
+ */
+import ScanRing from '@/components/ScanRing.astro';
+import HealmMark from '@/components/HealmMark.astro';
+import WaitlistForm from '@/components/WaitlistForm.astro';
+import { url } from '@/lib/url';
+import { appStoreUrl } from '@/lib/site';
+---
+<section id="download" class="chapter theme-dark grain download" aria-labelledby="download-title" data-download-chapter>
+  <div class="wrap download-grid">
+    <ScanRing class="download-ring" decorative>
+      <div class="download-center">
+        <HealmMark variant="tile" tone="dark" size={64} />
+        <h2 id="download-title" class="download-title">Get Healm first.</h2>
+        {appStoreUrl ? (
+          <a href={appStoreUrl} class="download-badge">
+            <img src={url('badges/app-store-black.svg')} alt="Download on the App Store" width="150" height="50" />
+          </a>
+        ) : (
+          <p class="download-soon">Coming to the App Store</p>
+        )}
+      </div>
+    </ScanRing>
+
+    {!appStoreUrl && (
+      <div class="download-form">
+        <p class="download-lede">Leave your email and you’ll hear the day Healm lands. Free to use.</p>
+        <WaitlistForm />
+      </div>
+    )}
+  </div>
+</section>
+
+<style is:global>
+  .download { padding-block: var(--space-5xl); }
+  .download > .wrap { position: relative; z-index: 2; }
+  .download-grid { display: grid; gap: var(--space-3xl); justify-items: center; align-items: center; }
+  .download-ring { width: min(86vw, 500px); }
+  healm-scan-ring.download-ring > .download-center {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: var(--space-md);
+    text-align: center;
+    overflow: visible;
+  }
+  .download-title { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: clamp(34px, 7vw, 52px); line-height: 1.05; letter-spacing: var(--tracking-display); max-width: 8ch; }
+  .download-soon { margin: 0; color: var(--ink2); font-size: var(--type-secondary); }
+  .download-badge img { display: block; height: 50px; width: auto; }
+  .download-form { width: 100%; max-width: 34rem; }
+  .download-lede { margin: 0 0 var(--space-lg); color: var(--ink2); font-size: var(--type-lede); }
+  @media (min-width: 900px) {
+    .download-grid { grid-template-columns: auto 1fr; column-gap: var(--space-4xl); justify-items: start; }
+  }
+</style>
+
+<script>
+  import '@/scripts/chapters/download';
+</script>

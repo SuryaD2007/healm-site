@@ -1,0 +1,66 @@
+---
+/**
+ * Chapter 6, Privacy. Points that stand for the health file fly out toward the edges of a phone and bounce
+ * back inside, flashing mint where they hit, then settle: once, in under 5 seconds, when the phone is
+ * mostly on screen (src/scripts/chapters/privacy.ts). Under Reduce Motion they are already settled.
+ *
+ * Every line is in the privacy policy (privacy.html): the file lives on the phone; none of it is synced to
+ * iCloud or copied to Healm's server; the server's account has no name; an answer sends only what it
+ * needs, with permission, and none of it is kept; export and delete are in Settings. "Your photos stay
+ * on your phone" is not used: scan photos pass through the AI model for their answer.
+ */
+import PhoneFrame from '@/components/PhoneFrame.astro';
+import { url } from '@/lib/url';
+
+const facts = [
+  'Not synced to iCloud, not copied to Healm’s server.',
+  'An account with no name on it.',
+  'Export everything, or delete everything, from Settings.',
+];
+---
+<section id="privacy" class="chapter theme-light" aria-labelledby="privacy-title" data-privacy-chapter>
+  <div class="wrap chapter-grid is-flipped">
+    <div class="chapter-copy">
+      <h2 id="privacy-title" class="chapter-title">Your health file stays on your phone.</h2>
+      <p class="chapter-lede">
+        When you ask Healm something, only what that one answer needs goes to its AI model, with your
+        permission, and Healm keeps none of it.
+      </p>
+      <ul class="privacy-facts">
+        {facts.map((f) => <li>{f}</li>)}
+      </ul>
+      <div class="privacy-actions">
+        <a class="btn-text" href={url('privacy.html')}>Read the privacy policy</a>
+        <button type="button" class="btn-text" data-privacy-replay hidden>Play it again<span class="sr-only">: the points bouncing inside the phone</span></button>
+      </div>
+    </div>
+
+    <div class="chapter-device">
+      <PhoneFrame class="chapter-phone" label="Points that stand for your health file bounce off the inside edges of a phone and stay inside.">
+        <div class="pv theme-dark" data-pv>
+          <canvas class="pv-canvas" data-pv-canvas aria-hidden="true"></canvas>
+          <div class="pv-label" aria-hidden="true">
+            <p class="pv-title">Your health file</p>
+            <p class="pv-line">On this iPhone</p>
+          </div>
+        </div>
+      </PhoneFrame>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .privacy-facts { list-style: none; margin: var(--space-lg) 0 0; padding: 0; border-top: 1px solid var(--hairline); }
+  .privacy-facts li { padding: var(--space-sm) 0; border-bottom: 1px solid var(--hairline); font-size: var(--type-secondary); }
+  .privacy-actions { display: flex; flex-wrap: wrap; column-gap: var(--space-xl); margin-top: var(--space-md); }
+  .privacy-actions [hidden] { display: none; }
+  .pv { position: absolute; inset: 0; background: var(--ground); }
+  .pv-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .pv-label { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; color: var(--ink); pointer-events: none; }
+  .pv-title { margin: 0; font-family: var(--font-serif); font-size: calc(26 * var(--pt)); }
+  .pv-line { margin: calc(4 * var(--pt)) 0 0; color: var(--ink2); font-size: calc(15 * var(--pt)); }
+</style>
+
+<script>
+  import '@/scripts/chapters/privacy';
+</script>
