@@ -61,6 +61,13 @@ const fontFaces = `
     <link rel="apple-touch-icon" href={url('apple-touch-icon.png')} />
     <link rel="preload" href={url('fonts/InstrumentSerif-Regular.woff2')} as="font" type="font/woff2" crossorigin />
     <style is:inline set:html={fontFaces}></style>
+    <!-- Decided before first paint, so the Scan chapter never jumps from its plain layout to the pinned
+         one (src/components/chapters/ScanChapter.astro takes it off again if the sequence can't run). -->
+    <script is:inline>
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches && !/[?&]poster=/.test(location.search)) {
+        document.documentElement.classList.add('seq-on');
+      }
+    </script>
     <slot name="head" />
   </head>
   <body>
