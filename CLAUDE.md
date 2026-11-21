@@ -32,6 +32,9 @@ URL, because App Review links to it.
   `@astrojs/react` 7.1.2 asks for `oxc-transform-react` ^0.145, but `@vitejs/plugin-react` 6.2.1 needs
   0.152 to 0.156, so the override holds both to the direct dependency (0.156.0). Drop it when
   `@astrojs/react` catches up.
+- The deploy pins Node 24.13.0 (npm 11.6.2), the version the site is tested on. Newer npm checks the lockfile
+  more strictly, so after any dependency change run `npx npm@11.19.1 install --package-lock-only` too and
+  check `npm ci` from a clean clone with both before pushing to main.
 
 ## Design rules (from the app)
 
