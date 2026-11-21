@@ -28,6 +28,10 @@ URL, because App Review links to it.
 - `scripts/cdp.mjs` drives headless Chrome with software WebGL for renders and checks. The gstack browse
   binary has no WebGL, so it only ever sees the static fallback.
 - Packages are pinned exactly, each at least two weeks old when added. See docs/SKILLS.md.
+- `npm ci` must pass from a clean clone (the deploy runs it). The `overrides` in package.json exist for that:
+  `@astrojs/react` 7.1.2 asks for `oxc-transform-react` ^0.145, but `@vitejs/plugin-react` 6.2.1 needs
+  0.152 to 0.156, so the override holds both to the direct dependency (0.156.0). Drop it when
+  `@astrojs/react` catches up.
 
 ## Design rules (from the app)
 
