@@ -1,0 +1,21 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# logs and local env
+npm-debug.log*
+.env
+.env.*
+!.env.example
+
+# local Claude settings and editor files
+.claude/settings.local.json
+.DS_Store
+.vscode/
+
+# reports from Lighthouse and checks
+reports/
+.gstack/

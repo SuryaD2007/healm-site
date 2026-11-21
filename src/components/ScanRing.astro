@@ -1,0 +1,51 @@
+---
+/**
+ * The app's scan ring (src/scripts/scan-ring.ts). Anything inside sits in the face circle, which is
+ * 75% of the ring's width, as in SkinRingView (a 300 face in a 400 frame).
+ */
+interface Props {
+  autoplay?: 'visible';
+  startAngle?: number;
+  check?: boolean;
+  /** A small confirmation ring that fills in under a second. */
+  quick?: boolean;
+  label?: string;
+  decorative?: boolean;
+  class?: string;
+  id?: string;
+}
+const { autoplay, startAngle, check = false, quick = false, label, decorative = false, class: className, id } = Astro.props;
+---
+<healm-scan-ring
+  id={id}
+  class:list={['scan-ring', className]}
+  autoplay={autoplay}
+  start-angle={startAngle}
+  check={check ? '' : undefined}
+  quick={quick ? '' : undefined}
+  label={label}
+  decorative={decorative ? '' : undefined}
+>
+  <slot />
+</healm-scan-ring>
+
+<style is:global>
+  healm-scan-ring {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    transform-origin: center;
+  }
+  healm-scan-ring > * { grid-area: 1 / 1; }
+  healm-scan-ring > .ring-svg { width: 100%; height: 100%; overflow: visible; }
+  healm-scan-ring > :not(.ring-svg) {
+    width: 75%;
+    height: 75%;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  import '@/scripts/scan-ring';
+</script>

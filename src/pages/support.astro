@@ -1,0 +1,74 @@
+---
+/**
+ * Support: how to reach Healm, how to export or delete your data, and short answers. App Store Connect needs
+ * this page's URL. Every answer is in the terms, the privacy policy, or the app's own settings; change them
+ * together.
+ */
+import Base from '@/layouts/Base.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import SiteFooter from '@/components/SiteFooter.astro';
+import { site } from '@/lib/site';
+
+const questions = [
+  {
+    q: 'How do I move Healm to a new iPhone?',
+    a: 'Link your account to your Apple ID with Sign in with Apple, then sign in with the same Apple ID on the new phone. Your health file isn’t synced anywhere, so export it from the old phone first if you want a copy.',
+  },
+  {
+    q: 'Healm says I’ve reached today’s limit.',
+    a: 'Questions, scans, label reads and lab readings each have a daily limit, shown in the app. They reset at your midnight.',
+  },
+  {
+    q: 'How do I turn off AI answers?',
+    a: 'Open You, then Settings, then AI answers. With them off, nothing is sent, and the morning note uses Healm’s own wording.',
+  },
+  {
+    q: 'Can I lock Healm?',
+    a: 'It locks with Face ID by default. In Settings, Require Face ID sets how soon it locks again after you leave the app.',
+  },
+];
+---
+<Base
+  title="Healm Support"
+  description="How to reach Healm, how to export or delete your data, and answers to common questions."
+  theme="auto"
+>
+  <SiteHeader sound={false} />
+  <main id="main" class="legal">
+    <h1>Support</h1>
+    <p class="lede">
+      Questions, problems, or a request about your data: email <a href={`mailto:${site.email}`}>{site.email}</a>.
+    </p>
+    <div class="callout">
+      <p>
+        <strong>Healm is not a doctor.</strong> It gives information, not diagnosis or treatment. <strong>In an emergency, call 911.</strong> If you are thinking about harming yourself, call or text 988.
+      </p>
+    </div>
+
+    <h2>Your data</h2>
+    <p>
+      Most things you can do in the app: in Healm, open You, then Settings. Export everything gives you a zip of
+      your file. Delete everything removes your account from Healm’s server and everything from your phone.
+    </p>
+    <p>
+      For anything you can’t do in the app, email <a href={`mailto:${site.email}`}>{site.email}</a>.
+      The <a href="privacy.html">privacy policy</a> says what Healm keeps and where.
+    </p>
+
+    <h2>Questions</h2>
+    {questions.map((x) => (
+      <>
+        <h3>{x.q}</h3>
+        <p>{x.a}</p>
+      </>
+    ))}
+
+    <h2>Elsewhere</h2>
+    <ul>
+      {site.socials.map((s) => (
+        <li><a href={s.url} rel="me noopener">{s.name}: {s.handle}</a></li>
+      ))}
+    </ul>
+  </main>
+  <SiteFooter />
+</Base>

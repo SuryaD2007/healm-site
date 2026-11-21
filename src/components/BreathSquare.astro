@@ -1,0 +1,78 @@
+---
+/**
+ * Calm breath's square (src/scripts/breath-square.ts). Drawn at the app's 200 points and scaled by
+ * CSS; strokes keep their hairline and 2 px widths at any size.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+const size = 200;
+const inset = 2; // HealmSize.progress
+const lo = inset;
+const hi = size - inset;
+---
+<healm-breath-square class:list={['breath', className]}>
+  <svg
+    class="breath-svg"
+    viewBox={`0 0 ${size} ${size}`}
+    data-size={size}
+    data-inset={inset}
+    aria-hidden="true"
+    focusable="false"
+  >
+    <rect x={lo} y={lo} width={hi - lo} height={hi - lo} fill="none" stroke="var(--hairline)" stroke-width="1" vector-effect="non-scaling-stroke" />
+    <polygon data-fading points={`${lo},${hi} ${lo},${lo} ${hi},${lo} ${hi},${hi}`} fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke" opacity="0" />
+    <polyline data-trace points="" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+  </svg>
+  <div class="breath-words">
+    <p class="breath-word"><span data-word></span></p>
+    <p class="breath-count tabular" data-count aria-hidden="true">In 4, hold 4, out 4, hold 4</p>
+  </div>
+  <button type="button" class="btn btn-secondary breath-toggle" data-toggle>
+    <span data-label>Breathe with it</span>
+  </button>
+  <p class="sr-only">
+    Box breathing, as in Healm's Calm breath: breathe in for 4 seconds, hold for 4, breathe out for 4,
+    hold for 4, then start again. Skip a hold whenever you like.
+  </p>
+</healm-breath-square>
+
+<style is:global>
+  healm-breath-square {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-md);
+  }
+  healm-breath-square .breath-svg {
+    width: min(var(--breath-size, var(--size-breath-square)), 70vw);
+    height: auto;
+    aspect-ratio: 1;
+    overflow: visible;
+  }
+  healm-breath-square .breath-words {
+    display: grid;
+    justify-items: center;
+    min-height: calc(var(--size-tap) + var(--type-caption) * 1.5);
+  }
+  healm-breath-square .breath-word {
+    margin: 0;
+    min-height: var(--size-tap);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-serif);
+    font-size: var(--type-card-title);
+    color: var(--ink);
+  }
+  healm-breath-square .breath-count {
+    margin: 0;
+    min-height: 1.5em;
+    font-size: var(--type-caption);
+    color: var(--ink2);
+  }
+  healm-breath-square .breath-toggle { min-width: 12rem; }
+</style>
+
+<script>
+  import '@/scripts/breath-square';
+</script>

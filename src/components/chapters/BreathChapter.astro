@@ -1,0 +1,31 @@
+---
+/**
+ * Chapter 5, Calm breath. The app's breathing square (BreathSquare.astro, from
+ * Healm/Features/Audio/SessionView.swift): in up the left, hold across the top, out down the right, hold
+ * across the bottom, 4 seconds each, with the words. It moves only after the visitor presses Breathe with
+ * it, and pauses from the same button. The lines are the app's own (the session's intro and
+ * "Skip a hold whenever you like.").
+ */
+import BreathSquare from '@/components/BreathSquare.astro';
+---
+<section id="breathe" class="chapter theme-dark" aria-labelledby="breathe-title">
+  <div class="wrap chapter-grid">
+    <div class="chapter-copy">
+      <h2 id="breathe-title" class="chapter-title">Breathe in a square.</h2>
+      <p class="chapter-lede">
+        In for four, hold for four, out for four, hold for four. Calm breath talks you through two minutes of
+        it, and you can skip a hold whenever you like.
+      </p>
+      <p class="breathe-note">Try one round here.</p>
+    </div>
+    <BreathSquare class="breathe-square" />
+  </div>
+</section>
+
+<style is:global>
+  .breathe-note { margin: var(--space-lg) 0 0; color: var(--ink2); font-size: var(--type-secondary); }
+  .breathe-square { --breath-size: 280px; }
+  @media (min-width: 900px) {
+    .breathe-square { --breath-size: 320px; }
+  }
+</style>

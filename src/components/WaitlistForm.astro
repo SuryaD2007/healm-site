@@ -1,0 +1,88 @@
+---
+/**
+ * The waitlist form, against the web-waitlist contract (src/lib/site.ts, waitlistUrl): POST JSON
+ * {email, source: "web", website}, where "website" is a honeypot people never see; the answer is
+ * {ok: true} or {ok: false, error}. Success swaps the form for a small ring that fills and checks.
+ * Behaviour: src/scripts/waitlist.ts.
+ */
+import ScanRing from '@/components/ScanRing.astro';
+import { site, waitlistReady } from '@/lib/site';
+
+interface Props {
+  id?: string;
+}
+const { id = 'waitlist' } = Astro.props;
+---
+<healm-waitlist class="waitlist" data-url={site.waitlistUrl} data-ready={waitlistReady ? 'true' : 'false'} data-email={site.email}>
+  <form class="waitlist-form" novalidate data-form>
+    <label class="waitlist-label" for={`${id}-email`}>Email</label>
+    <div class="waitlist-row">
+      <input
+        id={`${id}-email`}
+        class="field waitlist-field"
+        type="email"
+        name="email"
+        inputmode="email"
+        autocomplete="email"
+        autocapitalize="off"
+        spellcheck="false"
+        placeholder="you@example.com…"
+        required
+        aria-describedby={`${id}-help ${id}-error`}
+        data-email-input
+      />
+      <button type="submit" class="btn btn-primary waitlist-submit" data-submit>
+        <span data-submit-label>Join the waitlist</span>
+      </button>
+    </div>
+    <!-- People never see this field; a bot that fills it is turned away by the server. -->
+    <div class="waitlist-hp" aria-hidden="true">
+      <label for={`${id}-website`}>Website (leave empty)</label>
+      <input id={`${id}-website`} type="text" name="website" tabindex="-1" autocomplete="off" data-honeypot />
+    </div>
+    <p id={`${id}-help`} class="waitlist-help">We’ll email you when Healm is on the App Store.</p>
+    <p id={`${id}-error`} class="waitlist-error" data-error role="alert" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5v.01" /></svg>
+      <span data-error-text></span>
+    </p>
+  </form>
+
+  <div class="waitlist-done" data-done hidden>
+    <ScanRing class="waitlist-ring" quick check decorative />
+    <div>
+      <p class="waitlist-done-title" tabindex="-1" data-done-title>You’re on the list.</p>
+      <p class="waitlist-done-line">We’ll email you when Healm is on the App Store.</p>
+    </div>
+  </div>
+</healm-waitlist>
+
+<style is:global>
+  .waitlist { display: block; max-width: 34rem; }
+  .waitlist-label { display: block; margin-bottom: var(--space-xs); font-size: var(--type-body-strong); font-weight: 500; }
+  .waitlist-row { display: grid; gap: var(--space-sm); }
+  @media (min-width: 560px) {
+    .waitlist-row { grid-template-columns: 1fr auto; }
+  }
+  .waitlist-submit[aria-busy="true"] { opacity: 0.75; }
+  .waitlist-help { margin: var(--space-sm) 0 0; color: var(--ink2); font-size: var(--type-caption); }
+  .waitlist-error {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin: var(--space-sm) 0 0;
+    color: var(--ink);
+    font-size: var(--type-secondary);
+  }
+  .waitlist-error[hidden] { display: none; }
+  .waitlist-error svg { flex: none; color: var(--signal); }
+  .waitlist-hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .waitlist-done { display: flex; align-items: center; gap: var(--space-lg); }
+  .waitlist-done[hidden] { display: none; }
+  .waitlist-ring { width: 88px; flex: none; }
+  .waitlist-done-title { margin: 0; font-family: var(--font-serif); font-size: var(--type-card-title); outline-offset: 4px; }
+  .waitlist-done-line { margin: var(--space-xxs) 0 0; color: var(--ink2); font-size: var(--type-secondary); }
+</style>
+
+<script>
+  import '@/scripts/waitlist';
+</script>

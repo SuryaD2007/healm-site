@@ -1,0 +1,382 @@
+---
+/**
+ * The hero is the app's scan screen: the ring in the middle of a dark ground, the head inside it, one
+ * line of words. On wide screens the headline sits either side of the ring, so the ring scans between
+ * the two halves of the sentence. Behaviour: src/scripts/hero.ts.
+ */
+import { getImage } from 'astro:assets';
+import ScanRing from '@/components/ScanRing.astro';
+import { url } from '@/lib/url';
+import { appStoreUrl } from '@/lib/site';
+
+// The static render of the 3D scene (scripts/render-poster.mjs): the desktop render (22,000 points) and
+// the phone render (10,000, the same points the phone draws live). Optional, so the page builds before
+// the first render exists.
+const posters = import.meta.glob<{ default: ImageMetadata }>('../assets/hero/poster-*.png', { eager: true });
+const desktop = posters['../assets/hero/poster-desktop.png']?.default;
+const mobile = posters['../assets/hero/poster-mobile.png']?.default;
+
+type Format = 'avif' | 'webp' | 'png';
+async function srcset(img: ImageMetadata, widths: number[], format: Format) {
+  const out = await Promise.all(widths.map((width) => getImage({ src: img, width, format, quality: format === 'png' ? undefined : 72 })));
+  return out.map((o, i) => `${o.src} ${widths[i]}w`).join(', ');
+}
+const poster = desktop && mobile ? {
+  mobileAvif: await srcset(mobile, [360, 540, 720], 'avif'),
+  mobileWebp: await srcset(mobile, [360, 540, 720], 'webp'),
+  desktopAvif: await srcset(desktop, [520, 780, 1040, 1200], 'avif'),
+  desktopWebp: await srcset(desktop, [520, 780, 1040, 1200], 'webp'),
+  fallback: await getImage({ src: desktop, width: 780, format: 'png' }),
+} : null;
+const desktopSizes = '(min-width: 1100px) min(62vh, 600px), min(56vh, 520px)';
+---
+<section class="hero theme-dark grain" data-hero aria-labelledby="hero-title">
+  <div class="wrap hero-grid">
+    <h1 id="hero-title" class="hero-title">
+      <span class="hero-l">Turn your head.</span>
+      <span class="hero-r">Healm reads the&nbsp;rest.</span>
+    </h1>
+
+    <div
+      class="hero-stage"
+      data-stage
+      tabindex="0"
+      role="group"
+      aria-label="Scan"
+      aria-describedby="scan-help"
+    >
+      <div class="hero-scene" role="img" aria-label="A head drawn in scan lines, inside Healm’s scan ring. The ring fills in whichever direction the head turns.">
+        {poster && (
+          <picture class="hero-poster">
+            <source media="(max-width: 767px)" type="image/avif" srcset={poster.mobileAvif} sizes="min(88vw, 440px)" />
+            <source media="(max-width: 767px)" type="image/webp" srcset={poster.mobileWebp} sizes="min(88vw, 440px)" />
+            <source type="image/avif" srcset={poster.desktopAvif} sizes={desktopSizes} />
+            <source type="image/webp" srcset={poster.desktopWebp} sizes={desktopSizes} />
+            <img src={poster.fallback.src} width="600" height="600" alt="" fetchpriority="high" decoding="async" />
+          </picture>
+        )}
+        <div class="hero-canvas" data-canvas></div>
+      </div>
+      <ScanRing class="hero-ring" decorative />
+      <button type="button" class="btn-icon is-bordered hero-pause" data-motion-toggle hidden>
+        <svg class="icon-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="3.5" height="14" rx="1" /><rect x="14.5" y="5" width="3.5" height="14" rx="1" /></svg>
+        <svg class="icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
+        <span class="sr-only" data-label>Pause the moving head</span>
+      </button>
+    </div>
+
+    <!-- Under the ring: the hint, then "Scan complete", and the two ways to run it. -->
+    <div class="hero-scanbar">
+      <p class="hero-status" data-scan-status aria-hidden="true"></p>
+      <div class="hero-scan-actions">
+        <button type="button" class="btn-text hero-scan-button" data-scan-auto>Auto scan</button>
+        <button type="button" class="btn-text hero-scan-button" data-scan-again hidden>Scan again</button>
+      </div>
+      <p id="scan-help" class="sr-only">
+        Use the arrow keys to turn the head. Each direction fills part of the ring, as in Healm’s face scan. Or
+        choose Auto scan to run it by itself.
+      </p>
+      <p class="sr-only" data-scan-live role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="hero-aside">
+      <p class="hero-lede">
+        An iPhone app that scans your skin, hair and body, reads your Apple Health each morning, and explains
+        your day in one plain line.
+      </p>
+      <div class="hero-cta">
+        {appStoreUrl ? (
+          <a href={appStoreUrl} class="hero-badge">
+            <img src={url('badges/app-store-black.svg')} alt="Download on the App Store" width="150" height="50" />
+          </a>
+        ) : (
+          <>
+            <a class="btn btn-primary hero-join" href="#download" data-hero-cta>Join the waitlist</a>
+            <p class="hero-note">Coming to the App Store. Free to use.</p>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap hero-foot">
+    <a class="hero-cue" href="#scan">
+      <span class="hero-cue-line" aria-hidden="true"></span>
+      Scroll to scan
+    </a>
+  </div>
+</section>
+
+<style>
+  /* Below 1100 px everything stacks, and it must fit one screen: the Scan chapter pins the hero from the
+     first scroll, so anything under the fold would never be seen. The stage gives way on short screens. */
+  .hero {
+    --stage: min(88vw, 440px, 44svh);
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: calc(72px + var(--space-xs));
+    padding-bottom: var(--space-md);
+    overflow: clip;
+  }
+  .hero > * { position: relative; z-index: 2; }
+
+  .hero-grid {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-md);
+  }
+  .hero-stage {
+    grid-row: 1;
+    position: relative;
+    width: var(--stage);
+    aspect-ratio: 1;
+  }
+  .hero-scene, .hero-canvas, .hero-stage :global(.hero-ring) { position: absolute; inset: 0; }
+  .hero-scene :global(picture), .hero-scene :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .hero-canvas { opacity: 0; transition: opacity 700ms var(--ease-reveal); }
+  .hero-scene :global(.hero-poster) { transition: opacity 700ms var(--ease-reveal); }
+  .hero-stage:global(.is-live) .hero-canvas { opacity: 1; }
+  .hero-stage:global(.is-live) :global(.hero-poster) { opacity: 0; }
+  .hero-stage :global(.hero-ring) { pointer-events: none; }
+
+  /* The stage takes the arrow keys; its focus ring is the ring's own circle. */
+  .hero-stage:focus-visible {
+    outline: 2px solid var(--action);
+    outline-offset: 4px;
+    border-radius: 50%;
+  }
+
+  /* Under the ring: one line of status and the scan buttons. Space is kept so nothing shifts. */
+  .hero-scanbar {
+    grid-row: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    column-gap: var(--space-sm);
+    min-height: var(--size-tap);
+    margin-top: calc(-1 * var(--space-sm));
+    text-align: center;
+  }
+  .hero-status {
+    margin: 0;
+    color: var(--ink2);
+    font-size: var(--type-secondary);
+    opacity: 0;
+    transition: opacity var(--dur-reveal) var(--ease-reveal);
+  }
+  .hero-status:global(.is-shown) { opacity: 1; }
+  :global(.hero.is-scanned) .hero-status { color: var(--ink); }
+  .hero-scan-actions { display: flex; gap: var(--space-md); justify-content: center; }
+  .hero-scan-button { font-size: var(--type-secondary); }
+  .hero-scan-button[hidden] { display: none; }
+
+  /* After the scan, the waitlist button glows once: a mint ring that opens out and fades, like the
+     scan ring's pulse. An outline, not a shadow. */
+  .hero-join { position: relative; }
+  .hero-join::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    border: 2px solid var(--scan-tick-filled);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .hero-join:global(.is-glowing)::after { animation: hero-glow 1100ms var(--ease-reveal) both; }
+  @keyframes hero-glow {
+    0% { opacity: 0; transform: scale(1); }
+    25% { opacity: 1; transform: scale(1.02); }
+    100% { opacity: 0; transform: scale(1.12, 1.35); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-join:global(.is-glowing)::after { animation: hero-glow-still 1400ms linear both; }
+    @keyframes hero-glow-still {
+      0%, 100% { opacity: 0; }
+      30%, 60% { opacity: 1; }
+    }
+  }
+
+  /* Pause for the moving head (WCAG 2.2.2). Quiet, in the stage's corner, only while the 3D is live. */
+  .hero-pause {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    color: var(--ink2);
+    background: var(--ground);
+  }
+  .hero-pause[hidden] { display: none; }
+  .hero-pause:hover { color: var(--ink); }
+  .hero-pause .icon-play { display: none; }
+  .hero-pause.is-paused .icon-play { display: block; }
+  .hero-pause.is-paused .icon-pause { display: none; }
+
+  .hero-title {
+    grid-row: 3;
+    margin: 0;
+    max-width: none;
+    text-align: center;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(36px, 9.6vw, 56px);
+    line-height: 1.02;
+    letter-spacing: var(--tracking-display);
+  }
+  /* Stacked: one line for each half. */
+  .hero-l, .hero-r { display: block; white-space: nowrap; }
+
+  .hero-aside {
+    grid-row: 4;
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: var(--space-md);
+  }
+  .hero-foot {
+    display: grid;
+    justify-items: center;
+    margin-top: var(--space-xs);
+  }
+  @media (max-width: 767px) {
+    .hero-aside .hero-lede { font-size: var(--type-secondary); max-width: 24rem; }
+  }
+  .hero-lede {
+    margin: 0;
+    max-width: 34rem;
+    color: var(--ink2);
+    font-size: var(--type-lede);
+    line-height: 1.5;
+  }
+  .hero-cta { display: grid; justify-items: center; gap: var(--space-sm); }
+  .hero-cta .btn { min-width: 14rem; }
+  .hero-note { margin: 0; color: var(--ink2); font-size: var(--type-caption); }
+  .hero-badge { display: inline-block; }
+  .hero-badge img { display: block; height: 50px; width: auto; }
+
+  .hero-cue {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    min-height: var(--size-tap);
+    margin-top: var(--space-md);
+    color: var(--ink2);
+    font-size: var(--type-caption);
+    text-decoration: none;
+  }
+  .hero-cue:hover { color: var(--ink); }
+  /* One tick of the ring, standing up: it fills mint once the scan above has finished. */
+  .hero-cue-line {
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--scan-tick);
+    transition: background-color var(--dur-reveal) var(--ease-reveal);
+  }
+  .hero:global(.is-scanned) .hero-cue-line { background: var(--scan-tick-filled); }
+
+  /* The lede and the button arrive just after first paint; the headline is there at once. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-aside > *, .hero-foot > * { animation: hero-rise var(--dur-reveal) var(--ease-reveal) both; }
+    .hero-aside > :nth-child(1) { animation-delay: 120ms; }
+    .hero-aside > :nth-child(2) { animation-delay: 180ms; }
+    .hero-foot > * { animation-delay: 240ms; }
+  }
+  @keyframes hero-rise {
+    from { opacity: 0; transform: translateY(var(--motion-rise)); }
+  }
+
+  @media (min-width: 768px) {
+    .hero { --stage: min(50svh, 520px); }
+    .hero-title { font-size: clamp(48px, 6.4vw, 72px); }
+  }
+
+  /* Wide: the two halves of the headline sit on one line across the ring, and the lede and button sit
+     under the second half. The middle two rows hold them; the outer rows split the rest, so the group is
+     centred on the ring. */
+  @media (min-width: 1100px) {
+    .hero { --stage: min(64vh, 620px); --side-gap: 40px; }
+    .hero-grid {
+      max-width: calc(1600px + 2 * var(--gutter));
+      container-type: inline-size;
+      grid-template-columns: 1fr var(--stage) 1fr;
+      grid-template-rows: 1fr auto auto 1fr auto;
+      gap: 0;
+      justify-items: stretch;
+    }
+    .hero-stage { grid-column: 2; grid-row: 1 / 5; }
+    .hero-scanbar {
+      grid-column: 2;
+      grid-row: 5;
+      display: grid;
+      justify-items: center;
+      min-height: calc(var(--size-tap) + 1.5em);
+      margin-top: calc(-1 * var(--space-lg));
+    }
+    .hero-status { min-height: 1.5em; }
+    .hero-title {
+      grid-row: 2;
+      grid-column: 1 / -1;
+      max-width: none;
+      display: grid;
+      grid-template-columns: 1fr var(--stage) 1fr;
+      align-items: end;
+      /* The longest line, "Healm reads", is 4.21 em wide: size the type to the room beside the ring, so each half
+         keeps two lines at any width. */
+      font-size: clamp(46px, calc(((100cqi - var(--stage)) / 2 - var(--side-gap)) / 4.6), 88px);
+      text-align: left;
+    }
+    /* Each half breaks the same way at every width: "Turn your / head." and "Healm reads / the rest." */
+    .hero-l {
+      grid-column: 1;
+      justify-self: end;
+      max-width: calc(3.6em + var(--side-gap));
+      text-align: right;
+      padding-right: var(--side-gap);
+    }
+    .hero-r { grid-column: 3; max-width: calc(4.45em + var(--side-gap)); padding-left: var(--side-gap); }
+    .hero-l, .hero-r { white-space: normal; }
+    .hero-aside {
+      grid-row: 3;
+      grid-column: 3;
+      min-width: 0;
+      justify-items: stretch;
+      text-align: left;
+      gap: var(--space-lg);
+      padding-left: var(--side-gap);
+      padding-top: var(--space-lg);
+    }
+    .hero-lede { max-width: min(24rem, 100%); font-size: var(--type-body); }
+    .hero-cta { justify-items: start; }
+    .hero-foot { margin-top: 0; }
+  }
+
+  /* The static render: only the scene, frozen, at a fixed size (scripts/render-poster.mjs). */
+  :global(html.poster-mode) .hero { padding: 0; min-height: 0; display: block; }
+  :global(html.poster-mode) .hero::after,
+  :global(html.poster-mode) .hero-title,
+  :global(html.poster-mode) .hero-scanbar,
+  :global(html.poster-mode) .hero-foot,
+  :global(html.poster-mode .hero-ring),
+  :global(html.poster-mode .hero-pause),
+  :global(html.poster-mode) .hero-scene :global(picture),
+  :global(html.poster-mode .site-header),
+  :global(html.poster-mode .skip-link) { display: none !important; }
+  :global(html.poster-mode) .hero-grid { display: block; padding: 0; max-width: none; }
+  :global(html.poster-mode) .hero-stage { width: 100vw; height: 100vh; aspect-ratio: auto; }
+  :global(html.poster-mode) .hero-canvas { opacity: 1; transition: none; }
+</style>
+
+<script>
+  import '@/scripts/hero';
+</script>

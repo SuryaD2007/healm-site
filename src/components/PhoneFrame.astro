@@ -1,0 +1,48 @@
+---
+/**
+ * A plain phone frame around an app screen: the screen at the app's own proportions (1320 x 2868, the
+ * Footage agent's screenshots), a thin bezel in the camera backdrop's near-black, and a hairline edge.
+ * Not a product rendering: no buttons, no reflections, no shadow. Size it with --phone-w.
+ * Inside, `--pt` is one app point, so screens rebuilt in HTML use the app's sizes: calc(17 * var(--pt)).
+ */
+interface Props {
+  class?: string;
+  label?: string;
+}
+const { class: className, label } = Astro.props;
+---
+<div class:list={['phone', className]} role={label ? 'img' : undefined} aria-label={label}>
+  <div class="phone-screen">
+    <slot />
+  </div>
+</div>
+
+<style is:global>
+  .phone {
+    --phone-w: 300px;
+    width: var(--phone-w);
+    padding: calc(var(--phone-w) * 0.03);
+    border-radius: calc(var(--phone-w) * 0.165);
+    background: var(--camera-backdrop);
+    border: 1px solid var(--control-border);
+    flex: none;
+  }
+  .phone-screen {
+    position: relative;
+    aspect-ratio: 1320 / 2868;
+    border-radius: calc(var(--phone-w) * 0.135);
+    overflow: hidden;
+    container-type: inline-size;
+    /* One app point: a 1320 px screenshot is 440 points wide (3x). */
+    --pt: calc(100cqw / 440);
+    background: var(--ground);
+  }
+  .phone-screen > picture,
+  .phone-screen > picture > img,
+  .phone-screen > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

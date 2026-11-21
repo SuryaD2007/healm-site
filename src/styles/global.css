@@ -1,0 +1,356 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/* Instrument Serif's @font-face lives in src/layouts/Base.astro, so its URL carries the site's base
+   path in dev and in the build, and matches the preload link exactly. */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: clip;
+  }
+  @media (pointer: fine) {
+    html { overscroll-behavior: none; }
+  }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--type-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  /* Each theme scope paints its own ground, so a light section inside the dark page is light. */
+  .theme-dark, .theme-light, .theme-auto, [data-theme] {
+    background-color: var(--ground);
+    color: var(--ink);
+  }
+
+  h1, h2, h3, h4 { text-wrap: balance; }
+  p, li { text-wrap: pretty; }
+
+  a { color: var(--action); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+  ::selection { background: var(--selection); color: var(--ink); }
+
+  /* Visible focus everywhere, on the action color. Never removed without a replacement. */
+  :focus-visible {
+    outline: 2px solid var(--action);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  :focus:not(:focus-visible) { outline: none; }
+
+  [id] { scroll-margin-top: var(--space-4xl); }
+
+  button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+  button:disabled { cursor: default; }
+}
+
+@layer components {
+  /* The page column. */
+  .wrap {
+    width: 100%;
+    max-width: calc(var(--content-max) + 2 * var(--gutter));
+    margin-inline: auto;
+    padding-inline: max(var(--gutter), env(safe-area-inset-left)) max(var(--gutter), env(safe-area-inset-right));
+  }
+
+  /* Skip link, first in the tab order. */
+  .skip-link {
+    position: absolute;
+    left: var(--space-md);
+    top: -100px;
+    z-index: 100;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--ink);
+    color: var(--ground);
+    border-radius: var(--radius-pill);
+    font-size: var(--type-body-strong);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .skip-link:focus-visible { top: var(--space-md); }
+
+  /* Display type. HealmDisplayText: Instrument Serif, 1.18 leading, -0.2 tracking. */
+  .display {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--type-display);
+    line-height: var(--type-display-leading);
+    letter-spacing: var(--type-display-tracking);
+  }
+
+  /* Numbers line up like the app's .monospacedDigit(). */
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* HealmPrimaryButton: the one strong action. Ink pill, ground text, 16 medium, 44 tall. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    min-height: var(--size-tap);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-pill);
+    font-size: var(--type-body-strong);
+    font-weight: 500;
+    line-height: 1.2;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background-color var(--dur-fade) var(--ease-reveal), opacity var(--dur-fade) var(--ease-reveal),
+      border-color var(--dur-fade) var(--ease-reveal);
+  }
+  .btn-primary { background: var(--ink); color: var(--ground); }
+  .btn-primary:hover { background: color-mix(in srgb, var(--ink) 88%, var(--ground)); }
+  .btn-primary:active { background: var(--ink2); }
+  .btn-primary:disabled, .btn-primary[aria-disabled="true"] {
+    background: var(--surface); color: var(--ink2); border-color: var(--hairline);
+  }
+  /* HealmSecondaryButton: the same pill on the ground, with a control border. */
+  .btn-secondary { background: var(--ground); color: var(--ink); border-color: var(--control-border); }
+  .btn-secondary:hover { border-color: var(--ink2); }
+  .btn-secondary:active { background: var(--surface); }
+  /* HealmTextButton: text in the action color, at least 44 tall. Dims while pressed. */
+  .btn-text {
+    display: inline-flex; align-items: center; gap: var(--space-xs);
+    min-height: var(--size-tap);
+    color: var(--action);
+    font-size: var(--type-body-strong); font-weight: 500;
+    text-decoration: none;
+    transition: opacity var(--dur-fade) var(--ease-reveal);
+  }
+  .btn-text:hover { text-decoration: underline; }
+  .btn-text:active { opacity: var(--pressed-opacity); }
+  /* HealmIconButton: a 44 square, one light-weight symbol, an optional round control border. */
+  .btn-icon {
+    display: inline-grid; place-items: center;
+    width: var(--size-tap); height: var(--size-tap);
+    border-radius: 999px;
+    color: var(--ink);
+    border: 1px solid transparent;
+    background: transparent;
+    transition: opacity var(--dur-fade) var(--ease-reveal), border-color var(--dur-fade) var(--ease-reveal);
+  }
+  .btn-icon.is-bordered { border-color: var(--control-border); }
+  .btn-icon:hover { border-color: var(--ink2); }
+  .btn-icon:active { opacity: var(--pressed-opacity); }
+
+  /* HealmChip / HealmChoiceChip: a 36 tall pill padded to a 44 target. */
+  .chip {
+    display: inline-flex; align-items: center;
+    min-height: var(--size-chip);
+    padding: var(--space-xs) var(--space-md);
+    margin-block: calc((var(--size-tap) - var(--size-chip)) / 2);
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--control-border);
+    background: var(--ground);
+    color: var(--ink);
+    font-size: var(--type-secondary);
+    line-height: 1.25;
+    transition: background-color var(--dur-fade) var(--ease-reveal), border-color var(--dur-fade) var(--ease-reveal);
+  }
+  .chip:hover { background: var(--surface); }
+  .chip[aria-pressed="true"] { background: var(--selection); border-color: var(--ink); }
+
+  /* HealmCard: a surface panel. No border, no shadow. */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    padding: var(--size-card-padding);
+  }
+
+  /* HealmCallout: the triage line. signalTint is only for this. */
+  .callout {
+    display: flex; align-items: baseline; gap: var(--space-sm);
+    background: var(--signal-tint);
+    border-radius: var(--radius-callout);
+    padding: var(--space-md);
+    font-size: var(--type-secondary);
+  }
+  .callout::before {
+    content: ""; flex: none;
+    width: var(--size-dot); height: var(--size-dot);
+    border-radius: 50%;
+    background: var(--signal);
+    transform: translateY(-1px);
+  }
+
+  /* HealmField: 48 tall, control border, pill. */
+  .field {
+    width: 100%;
+    min-height: var(--size-field);
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--control-border);
+    background: var(--ground);
+    color: var(--ink);
+    font-size: var(--type-body);
+    transition: border-color var(--dur-fade) var(--ease-reveal);
+  }
+  .field::placeholder { color: var(--ink2); opacity: 1; }
+  .field:hover { border-color: var(--ink2); }
+  .field:focus-visible { outline-offset: 2px; border-color: var(--ink); }
+  .field[aria-invalid="true"] { border-color: var(--signal); }
+
+  /* HealmHairline: rules carry hierarchy. */
+  .rule { border: 0; border-top: 1px solid var(--hairline); margin: 0; }
+
+  /* web: grain over dark sections, for depth without shadows or gradients. A fixed tile, no animation. */
+  .grain { position: relative; isolation: isolate; }
+  .grain::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: var(--grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+    mix-blend-mode: overlay;
+  }
+}
+
+/* The cursor (src/scripts/cursor.ts): an ink dot that becomes a small scan ring over things you can click.
+   The system cursor stays over text fields. */
+@layer components {
+  .has-cursor, .has-cursor * { cursor: none !important; }
+  .has-cursor :is(input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), textarea) {
+    cursor: text !important;
+  }
+  .cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    width: 36px;
+    height: 36px;
+    pointer-events: none;
+    opacity: 0;
+    color: var(--cursor-ink, var(--ink));
+    transition: opacity var(--dur-fade) var(--ease-reveal);
+    will-change: transform;
+  }
+  .cursor.is-visible { opacity: 1; }
+  .cursor.is-visible.is-text { opacity: 0; }
+  .cursor svg { display: block; overflow: visible; }
+  .cursor-dot {
+    fill: currentColor;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform var(--dur-move) var(--ease-reveal);
+  }
+  .cursor.is-ring .cursor-dot { transform: scale(0.5); }
+  .cursor.is-down .cursor-dot { transform: scale(0.8); }
+  .cursor-tick {
+    fill: var(--cursor-tick, var(--scan-tick-filled));
+    opacity: 0;
+    transition: opacity 90ms var(--ease-reveal);
+  }
+  /* The ticks fill clockwise, 6 ms apart: the whole ring in about 150 ms, a tap-sized echo of the app's. */
+  .cursor.is-ring .cursor-tick {
+    opacity: 1;
+    transition-delay: calc(var(--i) * 6ms);
+  }
+}
+
+/* The chapters after Scan and Ask (src/components/chapters/): words on one side, the app on the other,
+   alternating sides and grounds down the page. */
+@layer components {
+  .chapter { position: relative; padding-block: var(--space-5xl); }
+  .chapter-grid { display: grid; gap: var(--space-3xl); align-items: center; justify-items: center; }
+  .chapter-copy { max-width: 30rem; justify-self: start; }
+  .chapter-title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--type-section);
+    line-height: var(--type-section-leading);
+    letter-spacing: var(--tracking-display);
+  }
+  .chapter-lede { margin: var(--space-md) 0 0; color: var(--ink2); font-size: var(--type-lede); }
+  .chapter-device { position: relative; width: fit-content; }
+  .chapter-phone { --phone-w: min(78vw, 340px); }
+  @media (min-width: 900px) {
+    .chapter-grid { grid-template-columns: 1fr auto; column-gap: var(--space-5xl); }
+    .chapter-grid.is-flipped { grid-template-columns: auto 1fr; }
+    .chapter-grid.is-flipped > .chapter-copy { order: 2; }
+    .chapter-phone { --phone-w: min(30vw, 360px, calc(78svh / 2.1)); }
+  }
+
+  /* A pause for anything that moves by itself for more than 5 seconds (WCAG 2.2.2), by the phone. */
+  .demo-pause {
+    position: absolute;
+    right: calc(-1 * var(--size-tap) - var(--space-sm));
+    bottom: var(--space-md);
+    color: var(--ink2);
+    background: var(--ground);
+  }
+  .demo-pause[hidden] { display: none; }
+  .demo-pause:hover { color: var(--ink); }
+  .demo-pause .icon-play { display: none; }
+  .demo-pause.is-paused .icon-play { display: block; }
+  .demo-pause.is-paused .icon-pause { display: none; }
+  @media (max-width: 899px) {
+    .demo-pause { right: var(--space-md); bottom: var(--space-md); }
+  }
+}
+
+/* Privacy, Terms and Support: one readable column, the old pages' structure on the new tokens. The words
+   come from src/content/legal/*.html unchanged. */
+@layer components {
+  .legal { max-width: calc(44rem + 2 * var(--gutter)); margin-inline: auto; padding: var(--space-3xl) var(--gutter) var(--space-4xl); }
+  .legal h1 { margin: 0; font-family: var(--font-serif); font-weight: 400; font-size: clamp(40px, 7vw, 64px); line-height: 1.05; letter-spacing: var(--tracking-display); }
+  .legal h2 { margin: var(--space-2xl) 0 0; padding-top: var(--space-lg); border-top: 1px solid var(--hairline); font-family: var(--font-serif); font-weight: 400; font-size: clamp(26px, 4vw, 32px); line-height: 1.15; }
+  .legal h3 { margin: var(--space-lg) 0 0; font-size: var(--type-body); font-weight: 600; }
+  .legal p, .legal ul, .legal table { margin: var(--space-sm) 0 0; }
+  .legal ul { padding-left: 1.2em; }
+  .legal li + li { margin-top: 6px; }
+  .legal .meta { margin-top: var(--space-xs); color: var(--ink2); font-size: var(--type-secondary); }
+  .legal .lede { margin-top: var(--space-lg); font-size: var(--type-lede); }
+  .legal .callout { margin-top: var(--space-lg); display: block; }
+  .legal .callout::before { display: none; }
+  .legal .callout p:first-child { margin-top: 0; }
+  .legal table { width: 100%; border-collapse: collapse; font-size: var(--type-secondary); }
+  .legal th, .legal td { text-align: left; vertical-align: top; padding: var(--space-xs) var(--space-sm) var(--space-xs) 0; border-bottom: 1px solid var(--hairline); }
+  .legal th { font-weight: 600; }
+  .legal td:first-child { width: 38%; }
+  .legal-note { margin-top: var(--space-2xl); padding-top: var(--space-lg); border-top: 1px solid var(--hairline); color: var(--ink2); font-size: var(--type-caption); }
+  .legal-note p { margin-top: var(--space-xs); }
+  @media (max-width: 480px) {
+    .legal table, .legal thead, .legal tbody, .legal tr, .legal th, .legal td { display: block; width: 100%; }
+    .legal thead { display: none; }
+    .legal td { border-bottom: 0; padding: 2px 0; }
+    .legal td:first-child { width: 100%; font-weight: 600; padding-top: var(--space-sm); }
+    .legal tr { border-bottom: 1px solid var(--hairline); padding-bottom: var(--space-xs); }
+  }
+}
+
+/* Lenis (node_modules/lenis/dist/lenis.css), inlined: src/scripts/smooth.ts. */
+html.lenis, html.lenis body { height: auto; }
+.lenis:not(.lenis-autoToggle).lenis-stopped { overflow: clip; }
+.lenis [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-smooth iframe { pointer-events: none; }
+
+@utility sr-only-focusable {
+  &:not(:focus):not(:focus-within) {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+}
+
+/* Reduced motion: no transitions that move; fades stay short. Scripts read the same query. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

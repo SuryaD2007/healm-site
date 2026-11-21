@@ -1,0 +1,88 @@
+---
+/**
+ * HealmNumber's dial (Healm/Core/Design/HealmNumber.swift): a serif numeral, tabular, inside a 2 px arc
+ * in the action color over a hairline track. The morning reveal counts up from 0 over 600 ms on the
+ * reveal curve after a 300 ms wait (HealmMotion.countUp). Here it plays on load once visible and again
+ * from Replay; under Reduce Motion it shows the number at once.
+ */
+interface Props {
+  value: number;
+  size?: number;
+  label?: string;
+  class?: string;
+}
+const { value, size = 136, label = 'Your number', class: className } = Astro.props;
+const r = 50 - 1; // viewBox 100, arc 2 wide
+---
+<healm-dial class:list={['dial', className]} data-value={value} style={`--dial-size:${size}px`}>
+  <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--hairline)" stroke-width="2" vector-effect="non-scaling-stroke" />
+    <circle data-arc cx="50" cy="50" r={r} fill="none" stroke="var(--action)" stroke-width="2" stroke-linecap="round"
+      vector-effect="non-scaling-stroke" pathLength="100" stroke-dasharray={`${value} 100`} transform="rotate(-90 50 50)" />
+  </svg>
+  <span class="dial-numeral tabular" data-numeral aria-hidden="true">{value}</span>
+  <span class="sr-only">{label}, {value} out of 100.</span>
+</healm-dial>
+
+<style is:global>
+  healm-dial {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--dial-size);
+    height: var(--dial-size);
+  }
+  healm-dial > * { grid-area: 1 / 1; }
+  healm-dial svg { width: 100%; height: 100%; }
+  healm-dial .dial-numeral {
+    font-family: var(--font-serif);
+    font-size: calc(var(--dial-size) * 0.53);
+    line-height: 1;
+    color: var(--ink);
+  }
+</style>
+
+<script>
+  import { FrameLoop, prefersReducedMotion, reveal, tokenNumber } from '@/lib/motion';
+
+  class HealmDial extends HTMLElement {
+    private loop?: FrameLoop;
+    private startedAt = -1;
+    private seen = false;
+
+    connectedCallback() {
+      if (this.loop) return;
+      const value = Number(this.dataset.value ?? 0);
+      const arc = this.querySelector<SVGCircleElement>('[data-arc]');
+      const numeral = this.querySelector<HTMLElement>('[data-numeral]');
+      const delay = tokenNumber('--dur-count-up-delay', 300) / 1000;
+      const duration = tokenNumber('--dur-count-up', 600) / 1000;
+      this.loop = new FrameLoop(this, (t) => {
+        const p = reveal(Math.max(t - this.startedAt - delay, 0) / duration);
+        const shown = value * p;
+        arc?.setAttribute('stroke-dasharray', `${shown.toFixed(2)} 100`);
+        if (numeral) numeral.textContent = String(Math.round(shown));
+        return p < 1;
+      });
+      if (prefersReducedMotion()) return;
+      new IntersectionObserver((entries, obs) => {
+        if (entries.some((e) => e.isIntersecting) && !this.seen) {
+          this.seen = true;
+          obs.disconnect();
+          this.replay();
+        }
+      }, { threshold: 0.6 }).observe(this);
+    }
+
+    replay() {
+      if (!this.loop || prefersReducedMotion()) return;
+      this.startedAt = this.loop.time;
+      this.loop.start();
+    }
+
+    disconnectedCallback() {
+      this.loop?.destroy();
+    }
+  }
+  if (!customElements.get('healm-dial')) customElements.define('healm-dial', HealmDial);
+</script>

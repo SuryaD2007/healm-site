@@ -1,0 +1,147 @@
+---
+/**
+ * Chapter 4, Food. The app's Log food screen, rebuilt from the Footage agent's still
+ * (stills/food-quick-add-*.png) in app points: "2 eggs and toast" types itself, "Looking up what you ate"
+ * (the app's own line), the food appears as a row, then flies into the day's Calories and Protein bars,
+ * which grow. Bars, not a ring, because the app says so: "length from a common start reads more truly than
+ * an arc" (Healm/Features/Food/FoodComponents.swift, FoodTargetBar). Plays once in under 5 seconds when
+ * mostly on screen; Play it again replays it. Under Reduce Motion it shows the logged day.
+ * Behaviour: src/scripts/chapters/food.ts.
+ */
+import PhoneFrame from '@/components/PhoneFrame.astro';
+
+// Two large eggs and a slice of whole wheat toast, from usual USDA values.
+const food = { name: '2 eggs and toast', detail: '2 large eggs, 1 slice toast', kcal: 223, protein: 17 };
+const before = { kcal: 1240, protein: 68 };
+const target = { kcal: 2100, protein: 120 };
+const n = (x: number) => x.toLocaleString('en-US');
+---
+<section id="food" class="chapter theme-light" aria-labelledby="food-title" data-food-chapter>
+  <div class="wrap chapter-grid is-flipped">
+    <div class="chapter-copy">
+      <h2 id="food-title" class="chapter-title">Type what you ate.</h2>
+      <p class="chapter-lede">
+        Write it the way you’d say it, like 2 eggs and toast. Healm looks it up, shows the calories and protein,
+        and adds it to your day.
+      </p>
+      <button type="button" class="btn-text ask-replay" data-food-replay hidden>Play it again<span class="sr-only">: the food example</span></button>
+      <div class="sr-only">
+        <p>An example from the app.</p>
+        <p>You type: {food.name}. Healm finds {food.detail}: {food.kcal} calories and {food.protein} grams of protein.</p>
+        <p>Logged. Today: {n(before.kcal + food.kcal)} of {n(target.kcal)} calories, {before.protein + food.protein} of {target.protein} grams of protein.</p>
+      </div>
+    </div>
+
+    <div class="chapter-device">
+      <PhoneFrame class="chapter-phone">
+        <div class="fd theme-light" aria-hidden="true" data-fd
+          data-before-kcal={before.kcal} data-before-protein={before.protein}
+          data-kcal={food.kcal} data-protein={food.protein}
+          data-target-kcal={target.kcal} data-target-protein={target.protein}>
+          <span class="fd-time">9:41</span>
+          <span class="fd-island"></span>
+
+          <div class="fd-head">
+            <span class="fd-title">Log food</span>
+            <span class="fd-done">Done</span>
+          </div>
+          <p class="fd-label">Log food or ask anything</p>
+          <div class="fd-input">
+            <span class="fd-round"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M8 9v6M11 9v6M14 9v6M16.5 9v6" /></svg></span>
+            <span class="fd-field">
+              <span class="fd-placeholder">200g chicken, 2 eggs</span>
+              <span class="fd-typed" data-fd-typed></span><span class="fd-caret"></span>
+            </span>
+            <span class="fd-send" data-fd-send><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6" /></svg></span>
+          </div>
+
+          <p class="fd-looking" data-fd-looking>Looking up what you ate</p>
+          <div class="fd-card" data-fd-card>
+            <div>
+              <p class="fd-card-name">{food.name}</p>
+              <p class="fd-card-line tabular">{food.detail} · {food.kcal} kcal · {food.protein} g protein</p>
+            </div>
+            <span class="fd-log" data-fd-log>Log</span>
+          </div>
+
+          <p class="fd-section">Today</p>
+          <div class="fd-bar" data-fd-bar="kcal">
+            <p class="fd-bar-row"><span>Calories</span><span class="tabular"><span data-fd-value>{n(before.kcal + food.kcal)}</span> of {n(target.kcal)}</span></p>
+            <span class="fd-track"><span class="fd-fill" data-fd-fill style={`transform: scaleX(${(before.kcal + food.kcal) / target.kcal})`}></span></span>
+          </div>
+          <div class="fd-bar" data-fd-bar="protein">
+            <p class="fd-bar-row"><span>Protein</span><span class="tabular"><span data-fd-value>{before.protein + food.protein}</span> of {target.protein} g</span></p>
+            <span class="fd-track"><span class="fd-fill" data-fd-fill style={`transform: scaleX(${(before.protein + food.protein) / target.protein})`}></span></span>
+          </div>
+
+          <p class="fd-section fd-meal">Breakfast</p>
+          <div class="fd-entry" data-fd-entry>
+            <span>{food.name}</span><span class="tabular">{food.kcal} kcal</span>
+          </div>
+          <div class="fd-entry fd-entry-old">
+            <span>Greek yogurt</span><span class="tabular">165 kcal</span>
+          </div>
+        </div>
+      </PhoneFrame>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .fd { position: absolute; inset: 0; background: var(--ground); color: var(--ink); font-family: var(--font-sans); font-size: calc(17 * var(--pt)); -webkit-font-smoothing: antialiased; }
+  .fd svg { display: block; }
+  .fd p { margin: 0; }
+  .fd-time { position: absolute; left: calc(60 * var(--pt)); top: calc(20 * var(--pt)); font-weight: 600; }
+  .fd-island { position: absolute; left: calc(158 * var(--pt)); top: calc(14 * var(--pt)); width: calc(125 * var(--pt)); height: calc(37 * var(--pt)); border-radius: 999px; background: #000; }
+  .fd-head { position: absolute; left: calc(24 * var(--pt)); right: calc(24 * var(--pt)); top: calc(84 * var(--pt)); display: flex; align-items: baseline; }
+  .fd-title { font-family: var(--font-serif); font-size: calc(26 * var(--pt)); }
+  .fd-done { margin-left: auto; color: var(--action); font-weight: 500; }
+  .fd-label { position: absolute; left: calc(24 * var(--pt)); top: calc(138 * var(--pt)); font-weight: 500; }
+  .fd-input { position: absolute; left: calc(24 * var(--pt)); right: calc(24 * var(--pt)); top: calc(172 * var(--pt)); display: flex; gap: calc(8 * var(--pt)); align-items: center; }
+  .fd-round { flex: none; display: grid; place-items: center; width: calc(46 * var(--pt)); height: calc(46 * var(--pt)); border-radius: 50%; border: 1px solid var(--control-border); }
+  .fd-round svg { width: calc(22 * var(--pt)); }
+  .fd-field { flex: 1; min-width: 0; height: calc(47 * var(--pt)); display: flex; align-items: center; padding: 0 calc(16 * var(--pt)); border: 1px solid var(--control-border); border-radius: 999px; white-space: nowrap; overflow: hidden; }
+  .fd-placeholder { color: var(--ink2); }
+  .fd-typed { display: none; }
+  .fd-caret { display: none; width: 1.5px; height: 1.1em; margin-left: 1px; background: var(--action); }
+  .fd-send { flex: none; display: grid; place-items: center; width: calc(48 * var(--pt)); height: calc(48 * var(--pt)); border-radius: 50%; border: 1px solid var(--hairline); color: var(--ink2); transition: background-color var(--dur-fade) var(--ease-reveal), color var(--dur-fade) var(--ease-reveal); }
+  .fd-send svg { width: calc(22 * var(--pt)); }
+  .fd-send.is-ready { background: var(--ink); border-color: var(--ink); color: var(--ground); }
+
+  .fd-looking { position: absolute; left: calc(24 * var(--pt)); top: calc(250 * var(--pt)); color: var(--ink2); font-size: calc(15 * var(--pt)); display: none; }
+  .fd-card { position: absolute; left: calc(24 * var(--pt)); right: calc(24 * var(--pt)); top: calc(240 * var(--pt)); display: flex; align-items: center; gap: calc(12 * var(--pt)); padding: calc(14 * var(--pt)) calc(18 * var(--pt)); border-radius: calc(18 * var(--pt)); background: var(--surface); opacity: 0; }
+  .fd-card-name { font-weight: 400; }
+  .fd-card-line { margin-top: calc(2 * var(--pt)) !important; color: var(--ink2); font-size: calc(15 * var(--pt)); }
+  .fd-log { margin-left: auto; color: var(--action); font-weight: 500; font-size: calc(16 * var(--pt)); }
+
+  .fd-section { position: absolute; left: calc(24 * var(--pt)); top: calc(352 * var(--pt)); color: var(--ink2); font-size: calc(13 * var(--pt)); }
+  .fd-bar { position: absolute; left: calc(24 * var(--pt)); right: calc(24 * var(--pt)); }
+  .fd-bar[data-fd-bar="kcal"] { top: calc(378 * var(--pt)); }
+  .fd-bar[data-fd-bar="protein"] { top: calc(430 * var(--pt)); }
+  .fd-bar-row { display: flex; justify-content: space-between; font-size: calc(15 * var(--pt)); }
+  .fd-bar-row > span:last-child { color: var(--ink2); }
+  .fd-track { position: relative; display: block; margin-top: calc(8 * var(--pt)); height: calc(2 * var(--pt)); border-radius: 999px; background: var(--hairline); overflow: hidden; }
+  .fd-fill { position: absolute; inset: 0; background: var(--ink); transform-origin: left; border-radius: inherit; }
+  .fd-meal { top: calc(500 * var(--pt)); }
+  .fd-entry { position: absolute; left: calc(24 * var(--pt)); right: calc(24 * var(--pt)); top: calc(524 * var(--pt)); display: flex; justify-content: space-between; padding: calc(12 * var(--pt)) 0; border-bottom: 1px solid var(--hairline); }
+  .fd-entry > span:last-child { color: var(--ink2); font-size: calc(15 * var(--pt)); }
+  .fd-entry-old { top: calc(574 * var(--pt)); }
+  .fd-entry[data-fd-entry] { transition: opacity var(--dur-fade) var(--ease-reveal); }
+  .fd-entry-old { transition: transform var(--dur-move) var(--ease-move); }
+
+  /* While the demo plays. */
+  .fd.is-playing .fd-entry[data-fd-entry] { opacity: 0; }
+  /* The older row sits in the new one's place, then moves down to make room (transform only). */
+  .fd.is-playing .fd-entry-old { transform: translateY(calc(-50 * var(--pt))); }
+  .fd.is-typing .fd-placeholder { display: none; }
+  .fd.is-typing .fd-typed { display: inline; }
+  .fd.is-typing .fd-caret { display: inline-block; }
+  .fd.is-looking .fd-looking { display: block; }
+  .fd.is-carded .fd-card { opacity: 1; transition: opacity var(--dur-result) var(--ease-reveal); }
+  .fd.is-logged .fd-entry[data-fd-entry] { opacity: 1; }
+  .fd.is-logged .fd-entry-old { transform: none; }
+</style>
+
+<script>
+  import '@/scripts/chapters/food';
+</script>

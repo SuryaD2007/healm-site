@@ -1,0 +1,330 @@
+/*
+ * Healm design tokens for the web. One file: CSS variables first, then the Tailwind theme that maps
+ * onto them. Every value comes from the app (~/Developer/Healm, read-only) unless it is marked "web".
+ * Change a value in the app first, then here.
+ *
+ * Sources:
+ *   Colors    Healm/Core/Design/HealmColors.xcassets (+ HealmColor.swift for each color's job)
+ *   Type      Healm/Core/Design/HealmType.swift, HealmDisplayText.swift
+ *   Spacing   Healm/Core/Design/HealmSpace.swift (HealmSpace, HealmSize)
+ *   Radii     Healm/Core/Design/HealmRadius.swift (always the continuous corner style)
+ *   Motion    Healm/Core/Design/HealmMotion.swift
+ *   Scan ring Healm/Core/Scan/ScanEngine.swift (ScanRing, ScanPacing),
+ *             Healm/Features/Skin/Scan/SkinScanView.swift (SkinRingView)
+ *   Haptics   Healm/Features/Skin/SkinHaptics.swift (timing only; the web has no haptics)
+ *   Breath    Healm/Features/Audio/SessionView.swift (BreathSquare), HealmSpace.swift (breathSquare)
+ *   Icon      Healm/Resources/Icon/icon-{light,dark}.svg
+ *
+ * Rules carried from the app (Healm/CLAUDE.md): no shadows, no gradients, no emoji. Hairlines and
+ * spacing carry hierarchy. Amber (signal) flags, never red. 44 px tap targets.
+ */
+
+/* ------------------------------------------------------------------------------------------------
+ * Theme-independent tokens
+ * --------------------------------------------------------------------------------------------- */
+:root {
+  /* Type families are in the @theme block below (--font-serif, --font-sans). */
+
+  /* Type scale (px). HealmType.swift. */
+  --type-display: 31px;          /* HealmType.display, Instrument Serif 31 */
+  --type-display-leading: 1.18;  /* HealmType.Display.lineHeight */
+  --type-display-tracking: -0.2px; /* HealmType.Display.tracking */
+  --type-screen-title: 30px;     /* HealmType.screenTitle */
+  --type-card-title: 22px;       /* HealmType.cardTitle */
+  --type-numeral: 72px;          /* HealmType.numeral, the daily number */
+  --type-metric-value: 48px;     /* HealmType.metricValue */
+  --type-body: 17px;             /* HealmType.body, system 17 regular */
+  --type-body-strong: 16px;      /* HealmType.bodyStrong, system 16 medium (500) */
+  --type-secondary: 15px;        /* HealmType.secondary, system 15 */
+  --type-caption: 13px;          /* HealmType.caption, system 13 */
+  --type-micro: 11px;            /* HealmType.micro, system 11 */
+  /* web: the app's display style scaled for a screen wider than a phone. Same face, same tracking
+     ratio (-0.2 at 31 = -0.0065em), tighter leading at hero sizes where 1.18 reads loose. */
+  --type-hero: clamp(46px, 8.6vw, 128px);
+  --type-hero-leading: 1.0;
+  --type-section: clamp(36px, 5.4vw, 76px);
+  --type-section-leading: 1.06;
+  --type-lede: clamp(18px, 1.5vw, 21px);
+  --tracking-display: -0.0065em;
+
+  /* Spacing on a 4 point grid (1 pt = 1 css px). HealmSpace.swift. */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-top-safe: 64px;
+  /* web: section rhythm, multiples of the grid. */
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
+  --space-5xl: 144px;
+  --gutter: 16px;                /* 375 px phones; 24 from 640, 40 from 1024 (below) */
+  --content-max: 1200px;
+
+  /* Fixed sizes. HealmSpace.swift, HealmSize. */
+  --size-tap: 44px;              /* HealmSize.tapTarget */
+  --size-dot: 8px;               /* HealmSize.dot */
+  --size-hairline: 1px;          /* HealmSize.hairline */
+  --size-field: 48px;            /* HealmSize.field */
+  --size-progress: 2px;          /* HealmSize.progress, also the dial's arc width (HealmNumber.arcWidth) */
+  --size-breath-square: 200px;   /* HealmSize.breathSquare */
+  --size-card-padding: 20px;     /* HealmCard.padding */
+  --size-chip: 36px;             /* HealmChipStyle.height, padded to 44 to tap */
+
+  /* Radii and curves live in the @theme block below, under Tailwind's own names. */
+
+  /* Motion. HealmMotion.swift. Durations in ms. */
+  --dur-reveal: 400ms;           /* HealmMotion.reveal */
+  --dur-fade: 200ms;             /* HealmMotion.fade */
+  --dur-move: 250ms;             /* HealmMotion.move */
+  --dur-crossfade: 250ms;        /* HealmMotion.crossfade */
+  --dur-arrival-delay: 150ms;    /* HealmMotion.arrival */
+  --dur-result: 300ms;           /* HealmMotion.resultReveal */
+  --dur-count-up: 600ms;         /* HealmMotion.countUp */
+  --dur-count-up-delay: 300ms;
+  --dur-stagger: 60ms;           /* HealmMotion.stagger */
+  --motion-rise: 8px;            /* HealmMotion.rise */
+  --pressed-opacity: 0.5;        /* HealmMotion.pressedOpacity */
+  --dur-flash: 180ms;            /* HealmMotion.flashFade */
+  --dur-countdown: 150ms;        /* HealmMotion.countdownTick */
+  --dur-tick-glow: 450ms;        /* HealmMotion.tickGlow, tickGlowFade */
+  --dur-scan-arrow: 300ms;       /* HealmMotion.scanArrow */
+  --dur-ring-pulse: 500ms;       /* HealmMotion.ringPulse */
+  --dur-ring-pulse-return: 250ms; /* the pulse returns after this delay (SkinRingView) */
+  --ring-pulse-scale: 1.06;      /* HealmMotion.ringPulseScale */
+  --dur-ring-breath: 900ms;      /* HealmMotion.ringBreath, repeats, autoreverses */
+  --dur-check-draw: 450ms;       /* HealmMotion.checkDraw, after a 100 ms delay */
+  --dur-breath-fade: 600ms;      /* HealmMotion.breathSquareFade */
+  --dur-breath-phase: 4000ms;    /* BreathSquare.phaseSeconds */
+  --dur-story-slide: 5000ms;     /* HealmMotion.storySlide */
+  /* Springs, for JavaScript (SwiftUI response / dampingFraction; src/lib/spring.ts reads these). */
+  --spring-step: 0.4 1;          /* HealmMotion.step */
+  --spring-tick-fill: 0.28 0.72; /* HealmMotion.tickFill */
+  --spring-scan-settle: 0.45 0.8; /* HealmMotion.scanSettle */
+
+  /* The scan ring. ScanEngine.swift (ScanRing, ScanPacing), SkinScanView.swift (SkinRingView). */
+  --ring-ticks: 60;              /* ScanRing.ticks, 6 degrees each, tick 0 at the top, clockwise */
+  --ring-complete-share: 0.85;   /* ScanRing.completeShare */
+  --ring-min-seconds: 4;         /* ScanPacing.minimumRing: a full ring never draws faster */
+  --ring-ticks-per-second: 15;   /* ScanPacing.ticksPerSecond = 60 / 4 */
+  --ring-burst: 3;               /* ScanPacing.burst */
+  --ring-gap: 16px;              /* ring radius = face diameter / 2 + HealmSpace.md */
+  --ring-tick-length: 12px;      /* HealmSpace.sm */
+  --ring-tick-width: 3px;        /* HealmSize.progress + 1 */
+  --ring-tick-filled-length: 1.3; /* a filled tick grows to 1.3x its length */
+  --ring-glow-width: 2.5;        /* the glow capsule: 2.5x width, 1.6x length, 35% opacity */
+  --ring-glow-length: 1.6;
+  --ring-glow-opacity: 0.35;
+  --ring-face-settle-scale: 0.96; /* the face circle before it settles */
+
+  /* Haptic timing, kept for sound and motion cues. SkinHaptics.swift. */
+  --haptic-tick-gate: 30ms;      /* at most one tick transient per 30 ms */
+  --haptic-success-steps: 0ms 120ms 240ms; /* "Done: three rising taps" */
+  --haptic-swell: 450ms;         /* ring one done: a swell over 0.45 s */
+
+  /* web: grain over dark sections. Low enough that type stays crisp. */
+  --grain-opacity: 0.05;
+}
+
+/* web: the page gutter grows with the screen. Unlayered like the rest of this file, so nothing in a
+   Tailwind layer can override it by accident. */
+@media (min-width: 640px) { :root { --gutter: 24px; } }
+@media (min-width: 1024px) { :root { --gutter: 40px; } }
+
+/* ------------------------------------------------------------------------------------------------
+ * Colors. HealmColors.xcassets: each color has a light ("any") and a dark value.
+ * The site is dark by default (the hero is the app's scan, which is always dark). Light sections opt
+ * in with .theme-light. Privacy, Support and Terms follow the reader's system with .theme-auto.
+ * --------------------------------------------------------------------------------------------- */
+:root,
+.theme-dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0D1F22;          /* screen background */
+  --ink: #ECF2EF;             /* primary text and icons */
+  --ink2: #9FB3AE;            /* secondary text */
+  --surface: #15292D;         /* cards, the message field, the user's bubbles */
+  --hairline: #223A3E;        /* rules between rows; never the edge of a control */
+  --control-border: #5E736F;  /* edges of fields, unselected chips, icon buttons */
+  --action: #7FB6D1;          /* the score arc and anything tappable that is not a primary button */
+  --signal: #E0A35A;          /* flags and triage; amber, never red */
+  --signal-tint: #1B2F33;     /* the triage callout only */
+  --selection: #1D343A;       /* a selected chip */
+  --trend-muted: #5A6F6C;     /* sparklines not flagged */
+  --range-band: #223A3E;      /* the usual range behind a chart on a card */
+  --dot-neutral: #223A3E;     /* the dot on a metric row not flagged */
+  --skin-calm: #6CC49B;       /* the face map: calm */
+  --skin-watch: #E0A35A;      /*               worth watching */
+  --skin-flare: #E58A9C;      /*               flared */
+}
+
+.theme-light,
+[data-theme="light"] {
+  color-scheme: light;
+  --ground: #FFFFFF;
+  --ink: #10302E;
+  --ink2: #5A6F6C;
+  --surface: #F1F5F3;
+  --hairline: #E1E8E5;
+  --control-border: #889894;
+  --action: #1E5A78;
+  --signal: #A86A1F;
+  --signal-tint: #FBF5EC;
+  --selection: #E8EEF2;
+  --trend-muted: #889894;
+  --range-band: #E1E8E5;
+  --dot-neutral: #D7E0DC;
+  --skin-calm: #3E8E6A;
+  --skin-watch: #A86A1F;
+  --skin-flare: #B24A5E;
+}
+
+/* Follows the reader's system: light unless they prefer dark (the old site did the same). */
+.theme-auto {
+  color-scheme: light dark;
+  --ground: #FFFFFF;
+  --ink: #10302E;
+  --ink2: #5A6F6C;
+  --surface: #F1F5F3;
+  --hairline: #E1E8E5;
+  --control-border: #889894;
+  --action: #1E5A78;
+  --signal: #A86A1F;
+  --signal-tint: #FBF5EC;
+  --selection: #E8EEF2;
+  --trend-muted: #889894;
+  --range-band: #E1E8E5;
+  --dot-neutral: #D7E0DC;
+  --skin-calm: #3E8E6A;
+  --skin-watch: #A86A1F;
+  --skin-flare: #B24A5E;
+}
+@media (prefers-color-scheme: dark) {
+  .theme-auto:not([data-theme="light"]) {
+    --ground: #0D1F22;
+    --ink: #ECF2EF;
+    --ink2: #9FB3AE;
+    --surface: #15292D;
+    --hairline: #223A3E;
+    --control-border: #5E736F;
+    --action: #7FB6D1;
+    --signal: #E0A35A;
+    --signal-tint: #1B2F33;
+    --selection: #1D343A;
+    --trend-muted: #5A6F6C;
+    --range-band: #223A3E;
+    --dot-neutral: #223A3E;
+    --skin-calm: #6CC49B;
+    --skin-watch: #E0A35A;
+    --skin-flare: #E58A9C;
+  }
+}
+
+/* The camera colors are the same in both appearances, like the camera's own. */
+:root {
+  --camera-backdrop: #121415;          /* behind the camera preview; the scan screen's ground */
+  --camera-scrim: rgb(0 0 0 / 0.45);   /* darkens the image outside a capture guide */
+  --camera-guide: #FFFFFF;             /* a capture guide's line, the countdown, the flash */
+  --scan-tick: rgb(255 255 255 / 0.24); /* a ring tick not yet covered */
+  --scan-tick-filled: #8FE3CF;         /* a covered tick: the site's one accent, and it means "scanned" */
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Tailwind theme, part 1: fixed values under Tailwind's names. Tailwind writes these to :root as
+ * --radius-pill, --ease-reveal and so on, and makes rounded-pill, ease-reveal, font-serif.
+ * --------------------------------------------------------------------------------------------- */
+@theme {
+  /* Radii. HealmRadius.swift. */
+  --radius-pill: 24px;
+  --radius-card: 18px;
+  --radius-callout: 14px;
+  --radius-small: 8px;
+
+  /* Curves. HealmMotion.swift. */
+  --ease-reveal: cubic-bezier(0.23, 1, 0.32, 1);  /* reveal, fade, crossfade, countUp, ringPulse, tickGlowFade */
+  --ease-move: cubic-bezier(0.77, 0, 0.175, 1);   /* move, ringBreath */
+
+  /* Families. HealmType.swift. */
+  --font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Tailwind theme, part 2. "inline" so each utility reads the live variable, which changes per theme
+ * scope (.theme-dark, .theme-light, .theme-auto).
+ * --------------------------------------------------------------------------------------------- */
+@theme inline {
+  --color-*: initial;
+  --color-ground: var(--ground);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink2);
+  --color-surface: var(--surface);
+  --color-hairline: var(--hairline);
+  --color-control-border: var(--control-border);
+  --color-action: var(--action);
+  --color-signal: var(--signal);
+  --color-signal-tint: var(--signal-tint);
+  --color-selection: var(--selection);
+  --color-trend-muted: var(--trend-muted);
+  --color-skin-calm: var(--skin-calm);
+  --color-skin-watch: var(--skin-watch);
+  --color-skin-flare: var(--skin-flare);
+  --color-camera-backdrop: var(--camera-backdrop);
+  --color-camera-guide: var(--camera-guide);
+  --color-scan-tick: var(--scan-tick);
+  --color-scan-tick-filled: var(--scan-tick-filled);
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --text-hero: var(--type-hero);
+  --text-hero--line-height: var(--type-hero-leading);
+  --text-hero--letter-spacing: var(--tracking-display);
+  --text-section: var(--type-section);
+  --text-section--line-height: var(--type-section-leading);
+  --text-section--letter-spacing: var(--tracking-display);
+  --text-display: var(--type-display);
+  --text-display--line-height: var(--type-display-leading);
+  --text-display--letter-spacing: var(--type-display-tracking);
+  --text-screen-title: var(--type-screen-title);
+  --text-screen-title--line-height: 1.12;
+  --text-card-title: var(--type-card-title);
+  --text-card-title--line-height: 1.2;
+  --text-numeral: var(--type-numeral);
+  --text-numeral--line-height: 1;
+  --text-metric: var(--type-metric-value);
+  --text-metric--line-height: 1;
+  --text-lede: var(--type-lede);
+  --text-lede--line-height: 1.5;
+  --text-body: var(--type-body);
+  --text-body--line-height: 1.55;
+  --text-body-strong: var(--type-body-strong);
+  --text-body-strong--line-height: 1.4;
+  --text-body-strong--font-weight: 500;
+  --text-secondary: var(--type-secondary);
+  --text-secondary--line-height: 1.5;
+  --text-caption: var(--type-caption);
+  --text-caption--line-height: 1.45;
+  --text-micro: var(--type-micro);
+  --text-micro--line-height: 1.35;
+
+  --spacing-xxs: var(--space-xxs);
+  --spacing-xs: var(--space-xs);
+  --spacing-sm: var(--space-sm);
+  --spacing-md: var(--space-md);
+  --spacing-lg: var(--space-lg);
+  --spacing-xl: var(--space-xl);
+  --spacing-2xl: var(--space-2xl);
+  --spacing-3xl: var(--space-3xl);
+  --spacing-4xl: var(--space-4xl);
+  --spacing-5xl: var(--space-5xl);
+  --spacing-tap: var(--size-tap);
+  --spacing-gutter: var(--gutter);
+
+  /* No shadows in Healm (Healm/CLAUDE.md). The shadow utilities are switched off. */
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+}

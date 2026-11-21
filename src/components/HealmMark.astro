@@ -1,0 +1,40 @@
+---
+/**
+ * The Healm mark: the app icon's H (Healm/Resources/Icon/icon-*.svg). Two stems, and one steady line
+ * through them that runs edge to edge. Every stroke is 92 of 1024. Drawn in currentColor so it takes
+ * the ink of whatever it sits on.
+ */
+interface Props {
+  size?: number;
+  /** "glyph" is the H alone; "tile" is the app icon with its ground, at iOS's corner shape. */
+  variant?: 'glyph' | 'tile';
+  tone?: 'light' | 'dark';
+  class?: string;
+  label?: string;
+}
+const { size = 28, variant = 'glyph', tone = 'dark', class: className, label } = Astro.props;
+const ground = tone === 'dark' ? '#0D1F22' : '#FFFFFF';
+const ink = tone === 'dark' ? '#ECF2EF' : '#10302E';
+---
+{variant === 'glyph' ? (
+  <svg class:list={['healm-mark', className]} width={size} height={size} viewBox="0 0 1024 1024"
+    role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'} focusable="false">
+    <rect x="0" y="466" width="1024" height="92" fill="currentColor" />
+    <rect x="304" y="242" width="92" height="540" rx="46" fill="currentColor" />
+    <rect x="628" y="242" width="92" height="540" rx="46" fill="currentColor" />
+  </svg>
+) : (
+  <svg class:list={['healm-tile', className]} width={size} height={size} viewBox="0 0 1024 1024"
+    role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'} focusable="false">
+    <defs>
+      <clipPath id={`tile-${tone}`}><rect width="1024" height="1024" rx="230" /></clipPath>
+    </defs>
+    <g clip-path={`url(#tile-${tone})`}>
+      <rect width="1024" height="1024" fill={ground} />
+      <rect x="0" y="466" width="1024" height="92" fill={ink} />
+      <rect x="304" y="242" width="92" height="540" rx="46" fill={ink} />
+      <rect x="628" y="242" width="92" height="540" rx="46" fill={ink} />
+    </g>
+    <rect width="1024" height="1024" rx="230" fill="none" stroke="#223A3E" stroke-width="8" />
+  </svg>
+)}
